@@ -1,0 +1,39 @@
+Package: drug-suggestor v0.0.0
+================================================================================
+
+BASIC INFORMATION
+--------------------------------------------------------------------------------
+Summary: Suggest Drugs based on symptoms or images or description
+Author: Vamsidhar Reddy <r.vamsireddy93@gmail.com>
+Requires Python: >=3.11,<3.12
+
+DEPENDENCIES
+--------------------------------------------------------------------------------
+- langchain
+- pydantic
+
+PACKAGE STRUCTURE
+--------------------------------------------------------------------------------
+
+PYTHON (10 files):
+- src/drug_suggestor/__init__.py
+- src/drug_suggestor/__version__.py
+- src/drug_suggestor/main.py
+- src/drug_suggestor/v1/__init__.py
+- src/drug_suggestor/v1/main.py
+- src/drug_suggestor/v1/models/__init__.py
+- src/drug_suggestor/v1/models/disease.py
+- src/drug_suggestor/v1/models/drug.py
+- src/drug_suggestor/v1/models/patient.py
+- src/drug_suggestor/v1/templates/__init__.py
+
+DOCUMENTATION (2 files):
+- LICENSE.md
+- README.md
+
+CONFIGURATION (1 files):
+- pyproject.toml
+
+OTHER (1 files):
+- PKG-INFO
+

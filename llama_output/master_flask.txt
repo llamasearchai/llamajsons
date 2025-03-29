@@ -1,0 +1,115 @@
+===== LLAMA EXPLORER MASTER REPORT =====
+Target: flask (pypi)
+Date: 2025-03-03 17:36:44
+==================================
+
+PACKAGE INFORMATION
+------------------
+Name: flask
+Version: 3.1.0
+Description: # Flask
+
+Flask is a lightweight [WSGI][] web application framework. It is designed
+to make getting started quick and easy, with the ability to scale up to
+complex applications. It began as a simple wrapper around [Werkzeug][]
+and [Jinja][], and has become one of the most popular Python web
+application frameworks.
+
+Flask offers suggestions, but doesn't enforce any dependencies or
+project layout. It is up to the developer to choose the tools and
+libraries they want to use. There are many extensions provided by the
+community that make adding new functionality easy.
+
+[WSGI]: https://wsgi.readthedocs.io/
+[Werkzeug]: https://werkzeug.palletsprojects.com/
+[Jinja]: https://jinja.palletsprojects.com/
+
+
+## A Simple Example
+
+```python
+# save this as app.py
+from flask import Flask
+
+app = Flask(__name__)
+
+@app.route("/")
+def hello():
+    return "Hello, World!"
+```
+
+```
+$ flask run
+  * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+```
+
+
+## Donate
+
+The Pallets organization develops and supports Flask and the libraries
+it uses. In order to grow the community of contributors and users, and
+allow the maintainers to devote more time to the projects, [please
+donate today][].
+
+[please donate today]: https://palletsprojects.com/donate
+
+
+Author: Unknown
+License: Unknown
+Homepage: https://pypi.org/project/Flask/
+
+Python Version: >=3.9
+
+DEPENDENCIES
+------------
+  - Werkzeug
+  - Jinja2
+  - itsdangerous
+  - click
+  - blinker
+
+FILE STRUCTURE
+-------------
+SOURCE (23 files):
+  - flask/__init__.py
+  - flask/__main__.py
+  - flask/app.py
+  - flask/blueprints.py
+  - flask/cli.py
+  - flask/config.py
+  - flask/ctx.py
+  - flask/debughelpers.py
+  - flask/globals.py
+  - flask/helpers.py
+  - flask/json/__init__.py
+  - flask/json/provider.py
+  - flask/json/tag.py
+  - flask/logging.py
+  - flask/sansio/app.py
+  - flask/sansio/blueprints.py
+  - flask/sansio/scaffold.py
+  - flask/sessions.py
+  - flask/signals.py
+  - flask/templating.py
+  - ... and 3 more files
+
+DOCS (1 files):
+  - flask/sansio/README.md
+
+DATA (2 files):
+  - flask-3.1.0.dist-info/LICENSE.txt
+  - flask-3.1.0.dist-info/entry_points.txt
+
+OTHER (5 files):
+  - flask-3.1.0.dist-info/METADATA
+  - flask-3.1.0.dist-info/RECORD
+  - flask-3.1.0.dist-info/WHEEL
+  - flask/py.typed
+  - package.zip
+
+SECURITY NOTES
+-------------
+This is an automated analysis and may not identify all security concerns.
+Please review the code manually for any security issues.
+
+===== END OF REPORT =====

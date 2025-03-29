@@ -1,0 +1,2 @@
+[console_scripts]
+llama-explorer = llama_explorer.__main__:main_cli

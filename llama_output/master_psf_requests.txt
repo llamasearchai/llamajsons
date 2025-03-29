@@ -1,0 +1,149 @@
+===== LLAMA EXPLORER MASTER REPORT =====
+Target: psf_requests (github)
+Date: 2025-03-03 20:37:38
+==================================
+
+REPOSITORY INFORMATION
+----------------------
+Name: requests
+Full Name: psf/requests
+Description: A simple, yet elegant, HTTP library.
+Stars: 52562
+Forks: 9392
+Primary Language: Python
+Topics: client, cookies, forhumans, http, humans, python, python-requests, requests
+Created: 2011-02-13 18:38:17+00:00
+Last Updated: 2025-03-03 19:01:16+00:00
+
+FILE STRUCTURE
+-------------
+Total Files: 122
+
+SOURCE (36 files):
+  - setup.py
+  - tests/test_utils.py
+  - tests/conftest.py
+  - tests/test_structures.py
+  - tests/test_packages.py
+  - tests/test_testserver.py
+  - tests/compat.py
+  - tests/__init__.py
+  - tests/test_hooks.py
+  - tests/test_requests.py
+  - tests/utils.py
+  - tests/test_adapters.py
+  - tests/test_help.py
+  - tests/test_lowlevel.py
+  - tests/testserver/server.py
+  - tests/testserver/__init__.py
+  - docs/conf.py
+  - docs/_themes/flask_theme_support.py
+  - src/requests/cookies.py
+  - src/requests/auth.py
+  - ... and 16 more files
+
+DOCS (33 files):
+  - HISTORY.md
+  - README.md
+  - requirements-dev.txt
+  - AUTHORS.rst
+  - tests/certs/README.md
+  - tests/certs/mtls/README.md
+  - tests/certs/expired/README.md
+  - docs/index.rst
+  - docs/requirements.txt
+  - docs/api.rst
+  - docs/_templates/sidebarintro.html
+  - docs/_templates/sidebarlogo.html
+  - docs/_templates/hacks.html
+  - docs/user/install.rst
+  - docs/user/authentication.rst
+  - docs/user/quickstart.rst
+  - docs/user/advanced.rst
+  - docs/dev/contributing.rst
+  - docs/dev/authors.rst
+  - docs/community/support.rst
+  - ... and 13 more files
+
+TESTS (23 files):
+  - tests/certs/valid/server/server.key
+  - tests/certs/valid/server/Makefile
+  - tests/certs/valid/server/server.pem
+  - tests/certs/valid/server/server.csr
+  - tests/certs/valid/server/cert.cnf
+  - tests/certs/mtls/Makefile
+  - tests/certs/mtls/client/Makefile
+  - tests/certs/mtls/client/client.pem
+  - tests/certs/mtls/client/client.csr
+  - tests/certs/mtls/client/cert.cnf
+  - tests/certs/mtls/client/client.key
+  - tests/certs/expired/Makefile
+  - tests/certs/expired/ca/ca.cnf
+  - tests/certs/expired/ca/ca-private.key
+  - tests/certs/expired/ca/Makefile
+  - tests/certs/expired/ca/ca.crt
+  - tests/certs/expired/ca/ca.srl
+  - tests/certs/expired/server/server.key
+  - tests/certs/expired/server/Makefile
+  - tests/certs/expired/server/server.pem
+  - ... and 3 more files
+
+CONFIG (9 files):
+  - pyproject.toml
+  - tox.ini
+  - setup.cfg
+  - .github/FUNDING.yml
+  - .github/dependabot.yml
+  - .github/workflows/codeql-analysis.yml
+  - .github/workflows/lint.yml
+  - .github/workflows/lock-issues.yml
+  - .github/workflows/close-issues.yml
+
+ASSETS (11 files):
+  - ext/requests-logo.png
+  - ext/psf.png
+  - ext/kr-compressed.png
+  - ext/kr.png
+  - ext/requests-logo.svg
+  - ext/flower-of-life.jpg
+  - ext/ss.png
+  - ext/ss-compressed.png
+  - ext/psf-compressed.png
+  - ext/requests-logo-compressed.png
+  - docs/_static/requests-sidebar.png
+
+OTHER (10 files):
+  - LICENSE
+  - Makefile
+  - MANIFEST.in
+  - NOTICE
+  - ext/requests-logo.ai
+  - ext/LICENSE
+  - docs/Makefile
+  - docs/make.bat
+  - docs/_themes/LICENSE
+  - docs/_static/custom.css
+
+LANGUAGE BREAKDOWN
+-----------------
+Python: 376335 bytes
+
+TOP CONTRIBUTORS
+---------------
+kennethreitz: 1006 contributions
+Lukasa: 610 contributions
+sigmavirus24: 390 contributions
+nateprewitt: 282 contributions
+slingamn: 45 contributions
+BraulioVM: 43 contributions
+dpursehouse: 31 contributions
+jgorset: 26 contributions
+daftshady: 24 contributions
+jerem: 23 contributions
+
+SECURITY NOTES
+-------------
+This is an automated analysis and may not identify all security concerns.
+Please review the code manually for any security issues.
+
+===== END OF REPORT =====

@@ -1,0 +1,2814 @@
+File: /Users/hypocrite/Documents/MasterDocs/RelevantPythonScripts/2_JupyterCookbookScripts/Instructor-cookbook-scripts/1-introduction.py.py
+Language: python
+Code:
+#!/usr/bin/env python
+# coding: utf-8
+
+# # Working with structured outputs
+# 
+# If you've seen my [talk](https://www.youtube.com/watch?v=yj-wSRJwrrc&t=1s) on this topic, you can skip this chapter.
+# 
+# tl;dr
+# 
+# When we work with LLMs you find that many times we are not building chatbots, instead we're working with structured outputs in order to solve a problem by returning machine readable data. However the way we think about the problem is still very much influenced by the way we think about chatbots. This is a problem because it leads to a lot of confusion and frustration. In this chapter we'll try to understand why this happens and how we can fix it.
+# 
+
+# In[1]:
+
+
+import traceback
+
+
+# In[2]:
+
+
+RED = "\033[91m"
+RESET = "\033[0m"
+
+
+# ## The fundamental problem with JSON and Dictionaries
+# 
+# Lets say we have a simple JSON object, and we want to work with it. We can use the `json` module to load it into a dictionary, and then work with it. However, this is a bit of a pain, because we have to manually check the types of the data, and we have to manually check if the data is valid. For example, lets say we have a JSON object that looks like this:
+# 
+
+# In[3]:
+
+
+data = [{"first_name": "Jason", "age": 10}, {"firstName": "Jason", "age": "10"}]
+
+
+# We have a `name` field, which is a string, and an `age` field, which is an integer. However, if we were to load this into a dictionary, we would have no way of knowing if the data is valid. For example, we could have a string for the age, or we could have a float for the age. We could also have a string for the name, or we could have a list for the name.
+# 
+
+# In[4]:
+
+
+for obj in data:
+    name = obj.get("first_name")
+    age = obj.get("age")
+    print(f"{name} is {age}")
+
+for obj in data:
+    name = obj.get("first_name")
+    age = obj.get("age")
+    try:
+        age_next_year = age + 1
+        print(f"Next year {name} will be {age_next_year} years old")
+    except TypeError:
+        traceback.print_exc()
+
+
+# You see that while we were able to program with a dictionary, we had issues with the data being valid. We would have had to manually check the types of the data, and we had to manually check if the data was valid. This is a pain, and we can do better.
+# 
+
+# ## Pydantic to the rescue
+# 
+# Pydantic is a library that allows us to define data structures, and then validate them.
+# 
+
+# In[5]:
+
+
+from pydantic import BaseModel, Field, ValidationError
+
+class Person(BaseModel):
+    name: str
+    age: int
+
+
+person = Person(name="Sam", age=30)
+person
+
+
+# In[6]:
+
+
+# Data is correctly casted to the right type
+person = Person.model_validate({"name": "Sam", "age": "30"})
+person
+
+
+# In[7]:
+
+
+assert person.name == "Sam"
+assert person.age == 30
+
+try:
+    assert person.age == 20
+except AssertionError:
+    traceback.print_exc()
+
+
+# In[8]:
+
+
+# Data is validated to get better error messages
+try:
+    person = Person.model_validate({"first_name": "Sam", "age": "30.2"})
+except ValidationError as e:
+    print("Validation Error:")
+    for error in e.errors():
+        print(f"Field: {error['loc'][0]}, Error: {error['msg']}")
+
+    print(f"{RED}\nOriginal Traceback Below{RESET}")
+    traceback.print_exc()
+
+
+# By introducing pydantic into any python codebase you can get a lot of benefits. You can get type checking, you can get validation, and you can get autocomplete. This is a huge win, because it means you can catch errors before they happen. This is even more useful when we rely on language models to generate data for us.
+# 
+# You can also define validators that are run on the data. This is useful because it means you can catch errors before they happen. For example, you can define a validator that checks if the age is greater than 0. This is useful because it means you can catch errors before they happen.
+# 
+
+# ## Fundamental problem with asking for JSON from OpenAI
+# 
+# As we shall see below, the correct json format would be something of the format below:
+# 
+# ```python
+# {
+#     "name": "Jason",
+#     "age": 10
+# }
+# ```
+# 
+# However, we get errorenous outputs like:
+# 
+# ```python
+# {
+#   "jason": 10
+# }
+# ```
+
+# In[9]:
+
+
+from openai import OpenAI
+
+client = OpenAI()
+
+resp = client.chat.completions.create(
+    model="gpt-3.5-turbo",
+    messages=[
+        {"role": "user", "content": "Please give me jason is 10 as a json object ```json\n"},
+    ],
+    n=10,
+    temperature=1,
+)
+
+print("json that we want:")
+print("""
+{
+    "name": "Jason",
+    "age": 10
+}
+""")
+
+for choice in resp.choices:
+    json = choice.message.content
+    try:
+        person = Person.model_validate_json(json)
+        print(f"correctly parsed {person=}")
+    except Exception as e:
+        print("error!!")
+        print(json)
+
+
+# ## Introduction to Function Calling
+# 
+# The json could be anything! We could add more and more into a prompt and hope it works, or we can use something called [function calling](https://platform.openai.com/docs/guides/function-calling) to directly specify the schema we want.
+# 
+# **Function Calling**
+# 
+# In an API call, you can describe _functions_ and have the model intelligently
+# choose to output a _JSON object_ containing _arguments_ to call one or many
+# functions. The Chat Completions API does **not** call the function; instead, the
+# model generates _JSON_ that you can use to call the function in **your code**.
+# 
+# 
+
+# In[10]:
+
+
+import datetime
+
+
+class PersonBirthday(BaseModel):
+    name: str
+    age: int
+    birthday: datetime.date
+
+
+schema = {
+    "properties": {
+        "name": {"type": "string"},
+        "age": {"type": "integer"},
+        "birthday": {"type": "string", "format": "YYYY-MM-DD"},
+    },
+    "required": ["name", "age"],
+    "type": "object",
+}
+
+resp = client.chat.completions.create(
+    model="gpt-3.5-turbo",
+    messages=[
+        {
+            "role": "user",
+            "content": f"Extract `Jason Liu is thirty years old his birthday is yesturday` into json today is {datetime.date.today()}",
+        },
+    ],
+    functions=[{"name": "Person", "parameters": schema}],
+    function_call="auto",
+)
+
+PersonBirthday.model_validate_json(resp.choices[0].message.function_call.arguments)
+
+
+# But it turns out, pydantic actually not only does our serialization, we can define the schema as well as add additional documentation!
+# 
+
+# In[11]:
+
+
+PersonBirthday.model_json_schema()
+
+
+# We can even define nested complex schemas, and documentation with ease.
+# 
+
+# In[12]:
+
+
+class Address(BaseModel):
+    address: str = Field(description="Full street address")
+    city: str
+    state: str
+
+
+class PersonAddress(Person):
+    """A Person with an address"""
+
+    address: Address
+
+
+PersonAddress.model_json_schema()
+
+
+# These simple concepts become what we built into `instructor` and most of the work has been around documenting how we can leverage schema engineering.
+# Except now we use `instructor.patch()` to add a bunch more capabilities to the OpenAI SDK.
+# 
+
+# # The core idea around Instructor
+# 
+# 1. Using function calling allows us use a llm that is finetuned to use json_schema and output json.
+# 2. Pydantic can be used to define the object, schema, and validation in one single class, allow us to encapsulate everything neatly
+# 3. As a library with 100M downloads, we can leverage pydantic to do all the heavy lifting for us and fit nicely with the python ecosystem
+# 
+
+# In[13]:
+
+
+import instructor
+import datetime
+
+# patch the client to add `response_model` to the `create` method
+client = instructor.patch(OpenAI(), mode=instructor.Mode.MD_JSON)
+
+resp = client.chat.completions.create(
+    model="gpt-3.5-turbo-1106",
+    messages=[
+        {
+            "role": "user",
+            "content": f"""
+            Today is {datetime.date.today()}
+
+            Extract `Jason Liu is thirty years old his birthday is yesturday`
+            he lives at 123 Main St, San Francisco, CA""",
+        },
+    ],
+    response_model=PersonAddress,
+)
+resp
+
+
+# By defining `response_model` we can leverage pydantic to do all the heavy lifting. Later we'll introduce the other features that `instructor.patch()` adds to the OpenAI SDK.
+# but for now, this small change allows us to do a lot more with the API.
+# 
+
+# ## Is instructor the only way to do this?
+# 
+# No. Libraries like Marvin, Langchain, and Llamaindex all now leverage the Pydantic object in similar ways. The goal is to be as light weight as possible, get you as close as possible to the openai api, and then get out of your way.
+# 
+# More importantly, we've also added straight forward validation and reasking to the mix.
+# 
+# The goal of instructor is to show you how to think about structured prompting and provide examples and documentation that you can take with you to any framework.
+# 
+# For further exploration:
+# 
+# - [Marvin](https://www.askmarvin.ai/)
+# - [Langchain](https://python.langchain.com/docs/modules/model_io/output_parsers/pydantic)
+# - [LlamaIndex](https://gpt-index.readthedocs.io/en/latest/examples/output_parsing/openai_pydantic_program.html)
+# 
+
+--------------------------------------------------------------------------------
+
+File: /Users/hypocrite/Documents/MasterDocs/RelevantPythonScripts/2_JupyterCookbookScripts/Instructor-cookbook-scripts/6-chain-of-density.py.py
+Language: python
+Code:
+#!/usr/bin/env python
+# coding: utf-8
+
+# # Chain Of Density Summarization
+
+# ## Introduction
+# 
+# **What is Chain Of Density summarization?**
+# 
+# Summarizing extensive texts with AI can be challenging. Initially, an AI produces a summary, then refines it through multiple iterations, adding missing article entities. Each iteration adds new article entities to the summary, keeping length consistent, leading to an entity-dense, informative summary called Chain Of Density.
+# 
+# It was first introduced in the paper - From Sparse to Dense : GPT-4 Summarization with Chain of Density prompting. 
+# 
+# This was done in the original paper by asking GPT-4 to generate all of the rewritten summaries in a single go with the following prompt below. 
+
+# > Article: {{ARTICLE}}
+# >
+# > You will generate increasingly concise, entity-dense summaries of the
+# > above Article.
+# >
+# > Repeat the following 2 steps 5 times.
+# >
+# > Step 1. Identify 1-3 informative Entities (";" delimited) from the
+# > Article which are missing from the previously generated summary.
+# > Step 2. Write a new, denser summary of identical length which covers
+# > every entity and detail from the previous summary plus the Missing
+# > Entities.
+# >
+# > A Missing Entity is:
+# > - Relevant: to the main story.
+# > - Specific: descriptive yet concise (5 words or fewer).
+# > - Novel; not in the previous summary.
+# > - Faithful: present in the Article.
+# > - Anywhere: located anywhere in the Article.
+# >
+# > Guidelines:
+# > - The first summary should be long (4-5 sentences, -80 words) yet
+# > highly non-specific, containing little information beyond the
+# > entities marked as missing. Use overly verbose language and fillers
+# > (e.g., "this article discusses") to reach -80 words.
+# > - Make every word count: re-write the previous summary to improve
+# > flow and make space for additional entities.
+# > - Make space with fusion, compression, and removal of uninformative
+# > phrases like "the article discusses"
+# > - The summaries should become highly dense and concise yet
+# > self-contained, e.g., easily understood without the Article.
+# > - Missing entities can appear anywhere in the new summary.
+# > - Never drop entities from the previous summary. If space cannot be
+# > made, add fewer new entities.
+# >
+# > Remember, use the exact same number of words for each summary.
+# >
+# > Answer in JSON. The JSON should be a list (length 5) of dictionaries
+# > whose keys are "Missing_Entities" and "Denser_Summary"
+
+# While the original paper used a single prompt to generate the iterative generations, we can go one step better with `Instructor` and break down the process into smaller API calls - with validation along the way.
+# 
+# The process can be broken down as seen below.
+
+# ![image.png](attachment:e3835897-9292-49af-a248-95eaa1d0b86a.png)
+
+# ### Setup and Dependencies
+# 
+# We'll be using two new libraries for our demonstration 
+# 
+# 1. `spaCy` : This provides a handful of useful utilities to do generic NLP tasks with
+# 2. `nltk` : This was used by the original paper to count the number of tokens in our generated summaries
+
+# We'll need to install the tokenizer packages and the spacy english library before we can proceed with the rest of the lesson
+
+# In[1]:
+
+
+import nltk
+nltk.download('punkt')
+
+get_ipython().system('python -m spacy download en_core_web_sm --quiet')
+
+
+# Once that's done, let's now move on to writing some code.
+
+# ## Definitions
+
+# There are a few different definitions which we'll need to understand in the tutorial. They are
+# 
+# 1. Tokens and tokenizers
+# 2. Entities
+# 3. Entity-Dense
+# 
+# Once we've gotten a hang of these concepts, we'll walk through a simple implementation of a Chain Of Density summarizer
+
+# ### Tokens and Tokenizers
+# 
+# In the original paper, the authors used `NLTK` to split the generated summary into tokens. These represent the smallest units that each sentence could be broken into where each hold semantic meaning.
+# 
+# Let's walk through a simple example to see how the `NLTK` tokenizer might work
+
+# In[2]:
+
+
+import nltk
+sentence = "My favourite type of Sashimi is Toro"
+
+nltk.word_tokenize(sentence)
+
+
+# NLTK's word tokenizer does more than just split by empty whitespace. It handles a lot of nice edge cases and contractions such as `don't` or `I'm`.
+
+# In[3]:
+
+
+sentence = "I'm fascinated by machine learning!"
+
+nltk.word_tokenize(sentence)
+
+
+# We can then calculate the number of tokens by simply finding the `len` of the generated sequence.
+
+# In[4]:
+
+
+sentence = "I'm fascinated by machine learning!"
+tokens = nltk.word_tokenize(sentence)
+print(tokens)
+print(len(tokens))
+
+
+# ### Entities
+# 
+# A named entity is an object in the real-world that we identify using a name. Common examples include people, countries, products or even books that we know and love. We can use the `spaCy` library for us to be able to detect the number of entities in a given sentence.
+
+# In[5]:
+
+
+# First we load in the library
+import spacy
+
+# Then we initialise an NLP object. 
+nlp = spacy.load("en_core_web_sm")
+
+
+# In[6]:
+
+
+sentence = "Apple is looking at buying U.K. startup for $1 billion"
+
+doc = nlp(sentence)
+doc.ents
+
+
+# We can see that Spacy was able to identify unique and named entities that were present within the sentence using the `doc.ents` property. Let's see a few more examples.
+
+# In[7]:
+
+
+sentence = "A knowledge graph, also known as a semantic network\
+, represents real-world entities and their relationships"
+
+doc = nlp(sentence)
+doc.ents
+
+
+# In[8]:
+
+
+sentence = "For example, a node representing an author like 'J.K. Rowling'\
+can be connected to another node representing one of her books, 'Harry Potter'\
+, with the edge 'author of'"
+
+doc = nlp(sentence)
+doc.ents
+
+
+# As we can see from the examples above, entities are not nouns. They're direct or indirect references to people, places, concepts.
+
+# ### Entity Density
+# 
+# Now that we know what tokens and tokens are, we can move on to our last concept - that of entity density. Entity density is simply the mean number of entities present per token within your string of text.
+
+# In[9]:
+
+
+import math
+nlp = spacy.load("en_core_web_sm")
+
+def calculate_entity_density(sentence:str):
+    tokens = nltk.word_tokenize(sentence)
+    entities = nlp(sentence).ents
+    entity_density = round(len(entities)/len(tokens),3)
+
+    return len(tokens),len(entities),entity_density
+
+
+# In[10]:
+
+
+sentence_1 = "A knowledge graph, also known as a semantic network\
+, represents real-world entities and their relationships"
+
+calculate_entity_density(sentence_1)
+
+
+# In[11]:
+
+
+sentence_2 = "Apple is looking at buying U.K. startup for $1 billion"
+
+calculate_entity_density(sentence_2)
+
+
+# This gives us a quantitative method to be able to understand and compare two different sentences/summaries.
+# 
+# We want summaries that are more entity-dense
+
+# In[12]:
+
+
+summary_1 = """
+This article discusses an incident that occurred during the Chinese Grand Prix
+involving two racing drivers, Jenson Button and Pastor Maldonado. The two were 
+competing for the 13th place when Button collided with Maldonado's vehicle, 
+causing damage to both cars. The incident resulted in a penalty for Button, 
+who was demoted to 14th place. Maldonado, on the other hand, had to retire from 
+the race due to the damage his car sustained.
+"""
+
+summary_2 = """
+Jenson Button's McLaren collided with Pastor Maldonado's Lotus during the Chinese 
+Grand Prix, causing front wing damage to Button's car and rear-end damage to 
+Maldonado's, forcing his retirement. Button received a five-second penalty and 
+two superlicence points, dropping himto 14th. Fernando Alonso advanced two places, 
+while Button was lapped by Nico Rosberg and Alonso by Sebastian Vettel and 
+Kimi Raikkonen.
+"""
+
+calculate_entity_density(summary_1),calculate_entity_density(summary_2)
+
+
+# We can see that the final summary is almost twice as dense as the first summary and is hence more *entity dense*.
+
+# ## Implementation
+# ### Data Classes
+# 
+# Let's start by walking through some of the data models that we'll be using as the response_model for our open ai function calls. We'll need a total of two different classes
+# 
+# 1. Initial Summary: which is the lengthy and overly verbose article
+# 2. Rewritten Summary : which represents
+
+# In[13]:
+
+
+from pydantic import BaseModel,Field,field_validator
+from typing import List
+
+
+# In[14]:
+
+
+class InitialSummary(BaseModel):
+    """
+    This is an initial summary which should be long ( 4-5 sentences, ~80 words)
+    yet highly non-specific, containing little information beyond the entities marked as missing.
+    Use overly verbose languages and fillers (Eg. This article discusses) to reach ~80 words.
+    """
+
+    summary: str = Field(
+        ...,
+        description="This is a summary of the article provided which is overly verbose and uses fillers. \
+        It should be roughly 80 words in length",
+    )
+
+
+# Pydantic is extremely handy because it allows us to do two things
+# 
+# 1. We can validate that our generated outputs are consistent with what we want, **and write vanilla python to validate so**
+# 2. We can export the generated class definition into a simple schema that fits in perfectly with OpenAI's function calling
+
+# In[15]:
+
+
+InitialSummary.model_json_schema()
+
+
+# It's important here to provide a good description of the overall class and the respective fields. This is because all of the descriptions that we write for the individual fields and the class itself **are directly used by the llm when generating outputs**.
+# 
+# Now, as a quick recap, when we rewrite our summaries at each step, we're performing a few things
+# 
+# 1. We identify any entities from the original article that are relevant which are **missing from our current summary**
+# 2. We then rewrite our summary, making sure to include as many of these new entities as possible with the goal of increasing the entity density of the new summary
+# 3. We then make sure that we have included all of the entities in our previous summary in the new rewritten summary.
+# 
+# We can express this in the form of the data model seen below called `RewrittenSummary`.
+
+# In[16]:
+
+
+class RewrittenSummary(BaseModel):
+    """
+    This is a new, denser summary of identical length which covers every entity
+    and detail from the previous summary plus the Missing Entities.
+
+    Guidelines
+    - Make every word count : Rewrite the previous summary to improve flow and make space for additional entities
+    - Never drop entities from the previous summary. If space cannot be made, add fewer new entities.
+    - The new summary should be highly dense and concise yet self-contained, eg., easily understood without the Article.
+    - Make space with fusion, compression, and removal of uninformative phrases like "the article discusses"
+    - Missing entities can appear anywhere in the new summary
+
+    An Entity is a real-world object that's assigned a name - for example, a person, country a product or a book title.
+    """
+
+    summary: str = Field(
+        ...,
+        description="This is a new, denser summary of identical length which covers every entity and detail from the previous summary plus the Missing Entities. It should have the same length ( ~ 80 words ) as the previous summary and should be easily understood without the Article",
+    )
+    absent: List[str] = Field(
+        ...,
+        default_factory=list,
+        description="this is a list of Entities found absent from the new summary that were present in the previous summary",
+    )
+    missing: List[str] = Field(
+        default_factory=list,
+        description="This is a list of 1-3 informative Entities from the Article that are missing from the new summary which should be included in the next generated summary.",
+    )
+
+
+# We'd also want our rewritten summary to have
+# 
+# 1. No missing entities => `absent` should have a length of 0
+# 2. New entities to be added in the next rewrite -> `missing` should have at least 1 entry
+# 3. A minimum length of 60 tokens and to have a density of at least 0.08 ( **NOTE**: 60 tokens and the 0.08 cut off are chosen arbitrarily, feel free to adjust them even higher if you wish. However, this might require you to add more retries in your code )
+# 
+# We can do so using the `field_validator` that we learnt in the previous lesson. This allows us to add in a validator for a specific field to ensure it meets our requirements. 
+# 
+# This gives us the final definition of our `RewrittenSummary` class as seen below
+
+# In[17]:
+
+
+class RewrittenSummary(BaseModel):
+    """
+    This is a new, denser summary of identical length which covers every entity
+    and detail from the previous summary plus the Missing Entities.
+
+    Guidelines
+    - Make every word count : Rewrite the previous summary to improve flow and make space for additional entities
+    - Never drop entities from the previous summary. If space cannot be made, add fewer new entities.
+    - The new summary should be highly dense and concise yet self-contained, eg., easily understood without the Article.
+    - Make space with fusion, compression, and removal of uninformative phrases like "the article discusses"
+    - Missing entities can appear anywhere in the new summary
+
+    An Entity is a real-world object that's assigned a name - for example, a person, country a product or a book title.
+    """
+
+    summary: str = Field(
+        ...,
+        description="This is a new, denser summary of identical length which covers every entity and detail from the previous summary plus the Missing Entities. It should have the same length ( ~ 80 words ) as the previous summary and should be easily understood without the Article",
+    )
+    absent: List[str] = Field(
+        ...,
+        default_factory=list,
+        description="this is a list of Entities found absent from the new summary that were present in the previous summary",
+    )
+    missing: List[str] = Field(
+        default_factory=list,
+        description="This is a list of 1-3 informative Entities from the Article that are missing from the new summary which should be included in the next generated summary.",
+    )
+        
+    
+    @field_validator("summary")
+    def min_length(cls, v: str):
+        tokens = nltk.word_tokenize(v) 
+        num_tokens = len(tokens)
+        if num_tokens < 60:
+            raise ValueError(
+                "The current summary is too short. Please make sure that you generate a new summary that is around 80 words long."
+            )
+        return v
+    
+    @field_validator("missing")
+    def has_missing_entities(cls, missing_entities: List[str]):
+        if len(missing_entities) == 0:
+            raise ValueError(
+                "You must identify 1-3 informative Entities from the Article which are missing from the previously generated summary to be used in a new summary"
+            )
+        return missing_entities
+    
+    @field_validator("absent")
+    def has_no_absent_entities(cls, absent_entities: List[str]):
+        absent_entity_string = ",".join(absent_entities)
+        if len(absent_entities) > 0:
+            print(f"Detected absent entities of {absent_entity_string}")
+            raise ValueError(
+                f"Do not omit the following Entities {absent_entity_string} from the new summary"
+            )
+        return absent_entities
+    
+    @field_validator("summary")
+    def min_entity_density(cls, v: str):
+        tokens = nltk.word_tokenize(v)
+        num_tokens = len(tokens)
+    
+        # Extract Entities
+        doc = nlp(v) 
+        num_entities = len(doc.ents)
+    
+        density = num_entities / num_tokens
+        if density < 0.08: 
+            raise ValueError(
+                f"The summary of {v} has too few entities. Please regenerate a new summary with more new entities added to it. Remember that new entities can be added at any point of the summary."
+            )
+    
+        return v
+
+
+# ### Putting it all together
+# 
+# Now that we have our models, let's implement a function to summarize a piece of text using a Chain Of Density summarization
+
+# In[18]:
+
+
+from openai import OpenAI
+import instructor
+
+client = instructor.patch(OpenAI()) 
+
+def summarize_article(article: str, summary_steps: int = 3):
+    summary_chain = []
+    # We first generate an initial summary
+    summary: InitialSummary = client.chat.completions.create(  
+        model="gpt-4-1106-preview",
+        response_model=InitialSummary,
+        messages=[
+            {
+                "role": "system",
+                "content": "Write a summary about the article that is long (4-5 sentences) yet highly non-specific. Use overly, verbose language and fillers(eg.,'this article discusses') to reach ~80 words",
+            },
+            {"role": "user", "content": f"Here is the Article: {article}"},
+            {
+                "role": "user",
+                "content": "The generated summary should be about 80 words.",
+            },
+        ],
+        max_retries=2,
+    )
+    prev_summary = None
+    summary_chain.append(summary.summary)
+    for i in range(summary_steps):
+        missing_entity_message = (
+            []
+            if prev_summary is None
+            else [
+                {
+                    "role": "user",
+                    "content": f"Please include these Missing Entities: {','.join(prev_summary.missing)}",
+                },
+            ]
+        )
+        new_summary: RewrittenSummary = client.chat.completions.create( 
+            model="gpt-4-1106-preview",
+            messages=[
+                {
+                    "role": "system",
+                    "content": """
+                You are going to generate an increasingly concise,entity-dense summary of the following article.
+
+                Perform the following two tasks
+                - Identify 1-3 informative entities from the following article which is missing from the previous summary
+                - Write a new denser summary of identical length which covers every entity and detail from the previous summary plus the Missing Entities
+
+                Guidelines
+                - Make every word count: re-write the previous summary to improve flow and make space for additional entities
+                - Make space with fusion, compression, and removal of uninformative phrases like "the article discusses".
+                - The summaries should become highly dense and concise yet self-contained, e.g., easily understood without the Article.
+                - Missing entities can appear anywhere in the new summary
+                - Never drop entities from the previous summary. If space cannot be made, add fewer new entities.
+                """,
+                },
+                {"role": "user", "content": f"Here is the Article: {article}"},
+                {
+                    "role": "user",
+                    "content": f"Here is the previous summary: {summary_chain[-1]}",
+                },
+                *missing_entity_message,
+            ],
+            max_retries=3, 
+            max_tokens=1000,
+            response_model=RewrittenSummary,
+        )
+        summary_chain.append(new_summary.summary)
+        prev_summary = new_summary
+
+    return summary_chain
+
+
+# ### Trial Run
+# 
+# Let's try running this on some sample text which we can import in from our repository. We've provided a sample article in a file called `article.txt`
+
+# In[19]:
+
+
+with open("./assets/article.txt","r+") as file:
+    article = file.readline()
+
+
+# In[ ]:
+
+
+get_ipython().run_cell_magic('time', '', '\nsummaries = summarize_article(article)\n')
+
+
+# We can see that it took roughly 40 seconds to do an iterative chain of density using this article. But does our approach increase the density of each individual summary? We can check by calculating the entity density of each summary in our list of summaries using the `calculate_entity_density` function we defined above.
+
+# In[ ]:
+
+
+for index,summary in enumerate(summaries):
+    tokens,entity,density = calculate_entity_density(summary)
+    print(f"Article {index+1} -> Results (Tokens: {tokens}, Entity Count: {entity}, Density: {density})")
+
+
+# We can take a look at the articles themselves to see if they qualitatively show improvement
+
+# In[ ]:
+
+
+for summary in summaries:
+    print(f"\n{summary}\n")
+
+
+# As we can see, the articles progressively introduce more entities and become more entity dense. We've performed 4 rounds of summarization here but you could definitely do with maybe 2-3 if latency is a significant issue.
+
+# ## Future Steps
+
+# This guide showed how to to generate complex summaries using chain of density summarization. We spent some time covering how to apply more complex validators - using `spaCy` and `NLTK` to ensure we had a minimum number of tokens and entity density as well as how you might apply instructor in a multi-stage process.
+# 
+# By building in validation at each step of the proccess, this helps to improve the performance of your LLM across various tasks.
+# 
+# For those looking to delve deeper, here are some to-do lists to explore.
+# 
+# - **Validate Increasing Entity Density**: `Pydantic` exposes a more complex validator that can take in an arbitrary python dictionary. Use the validation context to check the entity density of the previous summary and the new summary to validate that our model has generated a more entity-dense rewrite
+# - **Fine-Tuning** : `Instructor` comes with a simple to use interface to help you fine-tune other OpenAI models for your needs. This can be accomplished by capturing the outputs of LLMs using the `Instructions` module to generate training data for fine-tuning. In this specific case, finetuning a model to generate dense summaries could decrease latency and cost significantly by replacing the iterative LLM calls that we make .
+# 
+# By accomplishing these tasks, you'll gain practical experience in tuning your models to suit your specific tasks as well as build in more complex validation processes when working with LLMs to ensure more reliable, accurate and consistent outputs.
+
+--------------------------------------------------------------------------------
+
+File: /Users/hypocrite/Documents/MasterDocs/RelevantPythonScripts/2_JupyterCookbookScripts/Instructor-cookbook-scripts/7-synthetic-data-generation.py.txt
+Language: text
+Code:
+
+--------------------------------------------------------------------------------
+
+File: /Users/hypocrite/Documents/MasterDocs/RelevantPythonScripts/2_JupyterCookbookScripts/Instructor-cookbook-scripts/4-validation.py.py
+Language: python
+Code:
+#!/usr/bin/env python
+# coding: utf-8
+
+# # Validators
+
+# Instead of framing "self-critique" or "self-reflection" in AI as new concepts, we can view them as validation errors with clear error messages that the systen can use to self correct.
+# 
+# Pydantic offers an customizable and expressive validation framework for Python. Instructor leverages Pydantic's validation framework to provide a uniform developer experience for both code-based and LLM-based validation, as well as a reasking mechanism for correcting LLM outputs based on validation errors. To learn more check out the Pydantic [docs](https://docs.pydantic.dev/latest/) on validators.
+# 
+# Note: For the majority of this notebook we won't be calling openai, just using validators to see how we can control the validation of the objects.
+
+# Validators will enable us to control outputs by defining a function like so:
+# 
+# 
+# ```python
+# def validation_function(value):
+#     if condition(value):
+#         raise ValueError("Value is not valid")
+#     return mutation(value)
+# ```
+# 
+# Before we get started lets go over the general shape of a validator:
+
+# In[61]:
+
+
+from pydantic import BaseModel, ValidationError
+from typing_extensions import Annotated
+from pydantic import AfterValidator
+
+def name_must_contain_space(v: str) -> str:
+    if " " not in v:
+        raise ValueError("Name must contain a space.")
+    return v.lower()
+
+class UserDetail(BaseModel):
+    age: int
+    name: Annotated[str, AfterValidator(name_must_contain_space)]
+
+person = UserDetail(age=29, name="Jason")
+
+
+# **Validation Applications**
+# 
+# Validators are essential in tackling the unpredictabile nature of LLMs.
+# 
+# Straightforward examples include:
+# 
+# * Flagging outputs containing blacklisted words.
+# * Identifying outputs with tones like racism or violence.
+# 
+# For more complex tasks:
+# 
+# * Ensuring citations directly come from provided content.
+# * Checking that the model's responses align with given context.
+# * Validating the syntax of SQL queries before execution.
+
+# ## Setup and Dependencies
+
+# Using the [instructor](https://github.com/jxnl/instructor) library, we streamline the integration of these validators. `instructor` manages the parsing and validation of outputs and automates retries for compliant responses. This simplifies the process for developers to implement new validation logic, minimizing extra overhead.
+
+# To use instructor in our api calls, we just need to patch the openai client:
+
+# In[5]:
+
+
+import instructor 
+from openai import OpenAI
+
+client = instructor.patch(OpenAI())
+
+
+# ## Software 2.0: Rule-based validators
+
+# Deterministic validation, characterized by its rule-based logic, ensures consistent outcomes for the same input. Let's explore how we can apply this concept through some examples.
+
+# ### Flagging bad keywords
+
+# To begin with, we aim to prevent engagement in topics involving explicit violence.
+
+# We will define a blacklist of violent words that cannot be mentioned in any messages:
+
+# In[63]:
+
+
+blacklist = {
+    "rob",
+    "steal",
+    "hurt",
+    "kill",
+    "attack",
+}
+
+
+# To validate if the message contains a blacklisted word we will use a [field_validator](https://jxnl.github.io/instructor/blog/2023/10/23/good-llm-validation-is-just-good-validation/#using-field_validator-decorator) over the 'message' field:
+
+# In[64]:
+
+
+from pydantic import BaseModel, ValidationError, field_validator
+from pydantic.fields import Field
+
+class Response(BaseModel):
+    message: str
+
+    @field_validator('message')
+    def message_cannot_have_blacklisted_words(cls, v: str) -> str:
+        for word in v.split(): 
+            if word.lower() in blacklist:
+                raise ValueError(f"`{word}` was found in the message `{v}`")
+        return v
+
+Response(message="I will hurt him")
+
+
+# ### Flagging using OpenAI Moderation
+
+# To enhance our validation measures, we'll extend the scope to flag any answer that contains hateful content, harassment, or similar issues. OpenAI offers a moderation endpoint that addresses these concerns, and it's freely available when using OpenAI models.
+
+# With the `instructor` library, this is just one function edit away:
+
+# In[1]:
+
+
+from typing import Annotated
+from pydantic.functional_validators import AfterValidator
+
+
+# In[6]:
+
+
+from instructor import openai_moderation
+
+class Response(BaseModel):
+    message: Annotated[str, AfterValidator(openai_moderation(client=client))]
+
+
+# Now we have a more comprehensive flagging for violence and we can outsource the moderation of our messages.
+
+# In[7]:
+
+
+Response(message="I want to make them suffer the consequences")
+
+
+# And as an extra, we get flagging for other topics like religion, race etc.
+
+# In[26]:
+
+
+Response(message="I will mock their religion")
+
+
+# ### Filtering very long messages
+
+# In addition to content-based flags, we can also set criteria based on other aspects of the input text. For instance, to maintain user engagement, we might want to prevent the assistant from returning excessively long texts. 
+# 
+# Here, noticed that `Field` has built-in validators for `min_length` and `max_length`. to learn more checkout [Field Contraints](https://docs.pydantic.dev/latest/concepts/fields)
+
+# In[68]:
+
+
+class AssistantMessage(BaseModel):
+    message: str = Field(..., max_length=100)
+
+
+# In[69]:
+
+
+AssistantMessage(message="Certainly! Lorem ipsum is a placeholder text commonly used in the printing and typesetting industry. Here's a sample of Lorem ipsum text: Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam euismod velit vel tellus tempor, non viverra eros iaculis. Sed vel nisl nec mauris bibendum tincidunt. Vestibulum sed libero euismod, eleifend tellus id, laoreet elit. Donec auctor arcu ac mi feugiat, vel lobortis justo efficitur. Fusce vel odio vitae justo varius dignissim. Integer sollicitudin mi a justo bibendum ultrices. Quisque id nisl a lectus venenatis luctus. Please note that Lorem ipsum text is a nonsensical Latin-like text used as a placeholder for content, and it has no specific meaning. It's often used in design and publishing to demonstrate the visual aspects of a document without focusing on the actual content.")
+
+
+# ### Avoiding hallucination with citations
+
+# When incorporating external knowledge bases, it's crucial to ensure that the agent uses the provided context accurately and doesn't fabricate responses. Validators can be effectively used for this purpose. We can illustrate this with an example where we validate that a provided citation is actually included in the referenced text chunk:
+
+# In[70]:
+
+
+from pydantic import ValidationInfo
+
+class AnswerWithCitation(BaseModel):
+    answer: str
+    citation: str
+
+    @field_validator('citation')
+    @classmethod
+    def citation_exists(cls, v: str, info: ValidationInfo): 
+        context = info.context
+        if context:
+            context = context.get('text_chunk')
+            if v not in context:
+                raise ValueError(f"Citation `{v}` not found in text")
+        return v
+
+
+# Here we assume that there is a "text_chunk" field that contains the text that the model is supposed to use as context. We then use the `field_validator` decorator to define a validator that checks if the citation is included in the text chunk. If it's not, we raise a `ValueError` with a message that will be returned to the user.
+
+# In[71]:
+
+
+AnswerWithCitation.model_validate(
+    {
+        "answer": "Blueberries are packed with protein", 
+        "citation": "Blueberries contain high levels of protein"
+    },
+    context={"text_chunk": "Blueberries are very rich in antioxidants"}, 
+)
+
+
+# ## Software 3.0: Probabilistic validators
+
+# For scenarios requiring more nuanced validation than rule-based methods, we use probabilistic validation. This approach incorporates LLMs into the validation workflow for a sophisticated assessment of outputs.
+# 
+# The `instructor` library offers the `llm_validator` utility for this purpose. By specifying the desired directive, we can use LLMs for complex validation tasks. Let's explore some intriguing use cases enabled by LLMs.
+# 
+# ### Keeping an agent on topic
+# 
+# When creating an agent focused on health improvement, providing answers and daily practice suggestions, it's crucial to ensure strict adherence to health-related topics. This is important because the knowledge base is limited to health topics, and veering off-topic could result in fabricated responses.
+# 
+# To achieve this focus, we'll follow a similar process as before, but with an important addition: integrating an LLM into our validator.
+
+# This LLM will be tasked with determining whether the agent's responses are exclusively related to health topics. For this, we will use the `llm_validator` from `instructor` like so:
+
+# In[73]:
+
+
+from instructor import llm_validator
+
+class AssistantMessage(BaseModel):
+    message: Annotated[str, 
+                       AfterValidator(
+                           llm_validator("don't talk about any other topic except health best practices and topics", 
+                                         client=client))]
+
+AssistantMessage(message="I would suggest you to visit Sicily as they say it is very nice in winter.")
+
+
+# Important that for these examples we're not waiting for the messages, to get this message we would need to call the openai with `response_model=AssistantMessage`.
+
+# ### Validating agent thinking with CoT
+
+# Using probabilistic validation, we can also assess the agent's reasoning process to ensure it's logical before providing a response. With [chain of thought](https://learnprompting.org/docs/intermediate/chain_of_thought) prompting, the model is expected to think in steps and arrive at an answer following its logical progression. If there are errors in this logic, the final response may be incorrect.
+# 
+# Here we will use Pydantic's [model_validator](https://docs.pydantic.dev/latest/concepts/validators/#model-validators) which allows us to apply validation over all the properties of the `AIResponse` at once.
+# 
+# To make this easier we'll make a simple validation class that we can reuse for all our validation:
+
+# In[74]:
+
+
+from typing import Optional
+
+class Validation(BaseModel):
+    is_valid: bool = Field(..., description="Whether the value is valid based on the rules")
+    error_message: Optional[str] = Field(..., description="The error message if the value is not valid, to be used for re-asking the model")
+
+
+# The function we will call will integrate an LLM and will ask it to determine whether the answer the model provided follows from the chain of thought: 
+
+# In[75]:
+
+
+def validate_chain_of_thought(values):
+    chain_of_thought = values["chain_of_thought"]
+    answer = values["answer"]
+    resp = client.chat.completions.create(
+        model="gpt-4-1106-preview",
+        messages=[
+            {
+                "role": "system",
+                "content": "You are a validator. Determine if the value follows from the statement. If it is not, explain why.",
+            },
+            {
+                "role": "user",
+                "content": f"Verify that `{answer}` follows the chain of thought: {chain_of_thought}",
+            },
+        ],
+        response_model=Validation,
+    )
+    if not resp.is_valid:
+        raise ValueError(resp.error_message)
+    return values
+
+
+# The use of the 'before' argument in this context is significant. It means that the validator will receive the complete dictionary of inputs in their raw form, before any parsing by Pydantic.
+
+# In[76]:
+
+
+from typing import Any
+from pydantic import model_validator
+
+class AIResponse(BaseModel):
+    chain_of_thought: str
+    answer: str
+
+    @model_validator(mode='before')
+    @classmethod
+    def chain_of_thought_makes_sense(cls, data: Any) -> Any:
+        # here we assume data is the dict representation of the model
+        # since we use 'before' mode.
+        return validate_chain_of_thought(data)
+
+
+# In[77]:
+
+
+AIResponse(chain_of_thought="The user suffers from diabetes.", answer="The user has a broken leg.")
+
+
+# ## Reasking with validators
+# 
+# For most of these examples all we've done we've mostly only defined the validation logic.
+# 
+# We'eve covered field validators and model validators and even used LLMs to validate our outputs. But we haven't actually used the validators to reask the model! One of the most powerful features of `instructor` is that it will automatically reask the model when it receives a validation error. This means that we can use the same validation logic for both code-based and LLM-based validation.
+# 
+# This also means that our 'prompt' is not only the prompt we send, but the code that runs the validator, and the error message we send back to the model.
+
+# Integrating these validation examples with the OpenAI API is streamlined using `instructor`. After patching the OpenAI client with `instructor`, you simply need to specify a `response_model` for your requests. This setup ensures that all the validation processes occur automatically.
+# 
+# To enable reasking you can set a maximum number of retries. When calling the OpenAI client, the system can re-attempt to generate a correct answer. It does this by resending the original query along with feedback on why the previous response was rejected, guiding the LLM towards a more accurate answer in subsequent attempts.
+
+# In[79]:
+
+
+class QuestionAnswer(BaseModel):
+    question: str
+    answer: str
+
+question = "What is the meaning of life?"
+context = "The according to the devil the meaning of life is a life of sin and debauchery."
+
+
+resp = client.chat.completions.create(
+    model="gpt-4-1106-preview",
+    response_model=QuestionAnswer,
+    messages=[
+        {
+            "role": "system",
+            "content": "You are a system that answers questions based on the context. answer exactly what the question asks using the context.",
+        },
+        {
+            "role": "user",
+            "content": f"using the context: `{context}`\n\nAnswer the following question: `{question}`",
+        },
+    ],
+)
+
+resp.answer
+
+
+# In[80]:
+
+
+from pydantic import BeforeValidator
+
+class QuestionAnswer(BaseModel):
+    question: str
+    answer: Annotated[
+        str,
+        BeforeValidator(
+            llm_validator("don't say objectionable things", client=client)
+        ),
+    ]
+
+resp = client.chat.completions.create(
+    model="gpt-3.5-turbo",
+    response_model=QuestionAnswer,
+    max_retries=2,
+    messages=[
+        {
+            "role": "system",
+            "content": "You are a system that answers questions based on the context. answer exactly what the question asks using the context.",
+        },
+        {
+            "role": "user",
+            "content": f"using the context: `{context}`\n\nAnswer the following question: `{question}`",
+        },
+    ],
+)
+
+resp.answer
+
+
+# # Conclusion
+
+# This guide explains how to use deterministic and probabilistic validation techniques with Large Language Models (LLMs). We discussed using an instructor to establish validation processes for content filtering, context relevance maintenance, and model reasoning verification. These methods enhance the performance of LLMs across different tasks.
+# 
+# For those interested in further exploration, here's a to-do list:
+# 
+# 1. **SQL Syntax Checker**: Create a validator to check the syntax of SQL queries before executing them.
+# 2. **Context-Based Response Validation**: Design a method to flag responses based on the model's own knowledge rather than the provided context.
+# 3. **PII Detection**: Implement a mechanism to identify and handle Personally Identifiable Information in responses while prioritizing user privacy.
+# 4. **Targeted Rule-Based Filtering**: Develop filters to remove specific content types, such as responses mentioning named entities.
+# 
+# Completing these tasks will enable users to acquire practical skills in improving LLMs through advanced validation methods.
+
+--------------------------------------------------------------------------------
+
+File: /Users/hypocrite/Documents/MasterDocs/RelevantPythonScripts/2_JupyterCookbookScripts/Instructor-cookbook-scripts/2-tips.py.py
+Language: python
+Code:
+#!/usr/bin/env python
+# coding: utf-8
+
+# # General Tips on Prompting
+# 
+# Before we get into some big applications of schema engineering I want to equip you with the tools for success.
+# This notebook is to share some general advice when using prompts to get the most of your models.
+# 
+# Before you might think of prompt engineering as massaging this wall of text, almost like coding in a notepad. But with schema engineering you can get a lot more out of your prompts with a lot less work.
+# 
+
+# ## Classification
+# 
+# For classification we've found theres generally two methods of modeling.
+# 
+# 1. using Enums
+# 2. using Literals
+# 
+# Use an enum in Python when you need a set of named constants that are related and you want to ensure type safety, readability, and prevent invalid values. Enums are helpful for grouping and iterating over these constants.
+# 
+# Use literals when you have a small, unchanging set of values that you don't need to group or iterate over, and when type safety and preventing invalid values is less of a concern. Literals are simpler and more direct for basic, one-off values.
+# 
+
+# In[1]:
+
+
+import instructor
+from openai import OpenAI
+
+from enum import Enum
+from pydantic import BaseModel, Field
+from typing_extensions import Literal
+
+
+client = instructor.patch(OpenAI())
+
+
+# Tip: Do not use auto() as they cast to 1,2,3,4
+class House(Enum):
+    Gryffindor = "gryffindor"
+    Hufflepuff = "hufflepuff"
+    Ravenclaw = "ravenclaw"
+    Slytherin = "slytherin"
+
+
+class Character(BaseModel):
+    age: int
+    name: str
+    house: House
+
+    def say_hello(self):
+        print(
+            f"Hello, I'm {self.name}, I'm {self.age} years old and I'm from {self.house.value.title()}"
+        )
+
+
+resp = client.chat.completions.create(
+    model="gpt-4-1106-preview",
+    messages=[{"role": "user", "content": "Harry Potter"}],
+    response_model=Character,
+)
+resp.model_dump()
+
+
+# In[2]:
+
+
+resp.say_hello()
+
+
+# In[3]:
+
+
+class Character(BaseModel):
+    age: int
+    name: str
+    house: Literal["Gryffindor", "Hufflepuff", "Ravenclaw", "Slytherin"]
+
+
+resp = client.chat.completions.create(
+    model="gpt-4-1106-preview",
+    messages=[{"role": "user", "content": "Harry Potter"}],
+    response_model=Character,
+)
+resp.model_dump()
+
+
+# ## Arbitrary properties
+# 
+# Often times there are long properties that you might want to extract from data that we can not specify in advanced. We can get around this by defining an arbitrary key value store like so:
+# 
+
+# In[4]:
+
+
+from typing import List
+
+
+class Property(BaseModel):
+    key: str = Field(description="Must be snake case")
+    value: str
+
+
+class Character(BaseModel):
+    age: int
+    name: str
+    house: Literal["Gryffindor", "Hufflepuff", "Ravenclaw", "Slytherin"]
+    properties: List[Property]
+
+
+resp = client.chat.completions.create(
+    model="gpt-4-1106-preview",
+    messages=[{"role": "user", "content": "Snape from Harry Potter"}],
+    response_model=Character,
+)
+resp.model_dump()
+
+
+# ## Limiting the length of lists
+# 
+# In later chapters we'll talk about how to use validators to assert the length of lists but we can also use prompting tricks to enumerate values. Here we'll define a index to count the properties.
+# 
+# In this following example instead of extraction we're going to work on generation instead.
+# 
+
+# In[5]:
+
+
+class Property(BaseModel):
+    index: str = Field(..., description="Monotonically increasing ID")
+    key: str = Field(description="Must be snake case")
+    value: str
+
+
+class Character(BaseModel):
+    age: int
+    name: str
+    house: Literal["Gryffindor", "Hufflepuff", "Ravenclaw", "Slytherin"]
+    properties: List[Property] = Field(
+        ...,
+        description="Numbered list of arbitrary extracted properties, should be exactly 5",
+    )
+
+
+resp = client.chat.completions.create(
+    model="gpt-4-1106-preview",
+    messages=[{"role": "user", "content": "Snape from Harry Potter"}],
+    response_model=Character,
+)
+resp.model_dump()
+
+
+# ## Defining Multiple Entities
+# 
+# Now that we see a single entity with many properties we can continue to nest them into many users
+# 
+
+# In[6]:
+
+
+from typing import Iterable
+
+
+class Character(BaseModel):
+    age: int
+    name: str
+    house: Literal["Gryffindor", "Hufflepuff", "Ravenclaw", "Slytherin"]
+
+
+resp = client.chat.completions.create(
+    model="gpt-4-1106-preview",
+    messages=[{"role": "user", "content": "Five characters from Harry Potter"}],
+    response_model=Iterable[Character],
+)
+
+for character in resp:
+    print(character)
+
+
+# In[7]:
+
+
+from typing import Iterable
+
+
+class Character(BaseModel):
+    age: int
+    name: str
+    house: Literal["Gryffindor", "Hufflepuff", "Ravenclaw", "Slytherin"]
+
+
+resp = client.chat.completions.create(
+    model="gpt-4-1106-preview",
+    messages=[{"role": "user", "content": "Five characters from Harry Potter"}],
+    stream=True,
+    response_model=Iterable[Character],
+)
+
+for character in resp:
+    print(character)
+
+
+# ## Defining Relationships
+# 
+# Not only can we define lists of users, but with lists of properties we can also easily define lists of references. It's one of the more interesting things I've learned about prompting.
+# 
+
+# In[8]:
+
+
+class Character(BaseModel):
+    id: int
+    name: str
+    friends_array: List[int] = Field(description="Relationships to their friends using the id")
+
+
+resp = client.chat.completions.create(
+    model="gpt-4-1106-preview",
+    messages=[{"role": "user", "content": "5 kids from Harry Potter"}],
+    stream=True,
+    response_model=Iterable[Character],
+)
+
+for character in resp:
+    print(character)
+
+
+# With the tools we've discussed, we can find numerous real-world applications in production settings. These include extracting action items from transcripts, generating fake data, filling out forms, and creating objects that correspond to generative UI. These simple tricks will be highly useful.
+# 
+
+# # Missing Data
+# 
+# The Maybe pattern is a concept in functional programming used for error handling. Instead of raising exceptions or returning None, you can use a Maybe type to encapsulate both the result and potential errors.
+# 
+# This pattern is particularly useful when making LLM calls, as providing language models with an escape hatch can effectively reduce hallucinations.
+
+# In[9]:
+
+
+from typing import Optional
+
+class Character(BaseModel):
+    age: int
+    name: str
+
+class MaybeCharacter(BaseModel):
+    result: Optional[Character] = Field(default=None)
+    error: bool = Field(default=False)
+    message: Optional[str]
+
+
+# In[10]:
+
+
+def extract(content: str) -> MaybeCharacter:
+    return client.chat.completions.create(
+        model="gpt-3.5-turbo",
+        response_model=MaybeCharacter,
+        messages=[
+            {"role": "user", "content": f"Extract `{content}`"},
+        ],
+    )
+
+
+# In[11]:
+
+
+extract("Harry Potter")
+
+
+# In[12]:
+
+
+user = extract("404 Error")
+
+if user.error:
+    raise ValueError(user.message)
+
+
+--------------------------------------------------------------------------------
+
+File: /Users/hypocrite/Documents/MasterDocs/RelevantPythonScripts/2_JupyterCookbookScripts/Instructor-cookbook-scripts/3-0-applications-rag.py.py
+Language: python
+Code:
+#!/usr/bin/env python
+# coding: utf-8
+
+# # Applying Structured Output to RAG applications
+# 
+
+# **What is RAG?**
+# 
+# Retrieval Augmented Generation (RAG) models are the bridge between large language models and external knowledge databases. They fetch the relevant data for a given query. For example, if you have some documents and want to ask questions related to the content of those documents, RAG models help by retrieving data from those documents and passing it to the LLM in queries.
+# 
+# **How do RAG models work?**
+# 
+# The typical RAG process involves embedding a user query and searching a vector database to find the most relevant information to supplement the generated response. This approach is particularly effective when the database contains information closely matching the query but not more than that.
+# 
+# ![Image](https://jxnl.github.io/instructor/blog/img/dumb_rag.png)
+# 
+# **Why is there a need for them?**
+# 
+# Pre-trained large language models do not learn over time. If you ask them a question they have not been trained on, they will often hallucinate. Therefore, we need to embed our own data to achieve a better output.
+# 
+
+# ## Simple RAG
+# 
+# **What is it?**
+# 
+# The simplest implementation of RAG embeds a user query and do a single embedding search in a vector database, like a vector store of Wikipedia articles. However, this approach often falls short when dealing with complex queries and diverse data sources.
+# 
+# - **Query-Document Mismatch:** It assumes that the query and document embeddings will align in the vector space, which is often not the case.
+# - **Text Search Limitations:** The model is restricted to simple text queries without the nuances of advanced search features.
+# - **Limited Planning Ability:** It fails to consider additional contextual information that could refine the search results.
+# 
+
+# ## Improving the RAG model
+# 
+# **What's the solution?**
+# 
+# Enhancing RAG requires a more sophisticated approach known as query understanding.
+# 
+# This process involves analyzing the user's query and transforming it to better match the backend's search capabilities.
+# 
+# By doing so, we can significantly improve both the precision and recall of the search results, providing more accurate and relevant responses.
+# 
+# ![Image](https://jxnl.github.io/instructor/blog/img/query_understanding.png)
+# 
+
+# ## Practical Examples
+# 
+
+# In the examples below, we're going to use the [`instructor`](https://github.com/jxnl/instructor) library to simplify the interaction between the programmer and language models via the function-calling API.
+# 
+
+# In[1]:
+
+
+import instructor
+
+from openai import OpenAI
+from typing import List
+from pydantic import BaseModel, Field
+
+client = instructor.patch(OpenAI())
+
+
+# ### Example 1) Improving Extractions
+# 
+# One of the big limitations is that often times the query we embed and the text
+# we are searching for may not have a direct match, leading to suboptimal results.
+# A common method of using structured output is to extract information from a
+# document and use it to answer a question. Directly, we can be creative in how we
+# extract, summarize and generate potential questions in order for our embeddings
+# to do better.
+# 
+# For example, instead of using just a text chunk we could try to:
+# 
+# 1. extract key words and themes
+# 2. extract hypothetical questions
+# 3. generate a summary of the text
+# 
+# In the example below, we use the `instructor` library to extract the key words
+# and themes from a text chunk and use them to answer a question.
+# 
+
+# In[2]:
+
+
+class Extraction(BaseModel):
+    topic: str
+    summary: str
+    hypothetical_questions: List[str] = Field(
+        default_factory=list,
+        description="Hypothetical questions that this document could answer",
+    )
+    keywords: List[str] = Field(
+        default_factory=list, description="Keywords that this document is about"
+    )
+
+
+# In[3]:
+
+
+from pprint import pprint
+from typing import Iterable
+
+
+text_chunk = """
+## Simple RAG
+
+**What is it?**
+
+The simplest implementation of RAG embeds a user query and do a single embedding search in a vector database, like a vector store of Wikipedia articles. However, this approach often falls short when dealing with complex queries and diverse data sources.
+
+**What are the limitations?**
+
+- **Query-Document Mismatch:** It assumes that the query and document embeddings will align in the vector space, which is often not the case.
+    - Query: "Tell me about climate change effects on marine life."
+    - Issue: The model might retrieve documents related to general climate change or marine life, missing the specific intersection of both topics.
+- **Monolithic Search Backend:** It relies on a single search method and backend, reducing flexibility and the ability to handle multiple data sources.
+    - Query: "Latest research in quantum computing."
+    - Issue: The model might only search in a general science database, missing out on specialized quantum computing resources.
+- **Text Search Limitations:** The model is restricted to simple text queries without the nuances of advanced search features.
+    - Query: "what problems did we fix last week"
+    - Issue: cannot be answered by a simple text search since documents that contain problem, last week are going to be present at every week.
+- **Limited Planning Ability:** It fails to consider additional contextual information that could refine the search results.
+    - Query: "Tips for first-time Europe travelers."
+    - Issue: The model might provide general travel advice, ignoring the specific context of first-time travelers or European destinations.
+"""
+
+extractions = client.chat.completions.create(
+    model="gpt-4-1106-preview",
+    stream=True,
+    response_model=Iterable[Extraction],
+    messages=[
+        {
+            "role": "system",
+            "content": "Your role is to extract chunks from the following and create a set of topics.",
+        },
+        {"role": "user", "content": text_chunk},
+    ],
+)
+
+
+for extraction in extractions:
+    pprint(extraction.model_dump())
+
+
+# Now you can imagine if you were to embed the summaries, hypothetical questions,
+# and keywords in a vector database (i.e. in the metadata fields of a vector
+# database), you can then use a vector search to find the best matching document
+# for a given query. What you'll find is that the results are much better than if
+# you were to just embed the text chunk!
+# 
+
+# ### Example 2) Understanding 'recent queries' to add temporal context
+# 
+# One common application of using structured outputs for query understanding is to identify the intent of a user's query. In this example we're going to use a simple schema to seperately process the query to add additional temporal context.
+# 
+
+# In[4]:
+
+
+from datetime import date
+
+
+class DateRange(BaseModel):
+    start: date
+    end: date
+
+
+class Query(BaseModel):
+    rewritten_query: str
+    published_daterange: DateRange
+
+
+# In this example, `DateRange` and `Query` are Pydantic models that structure the user's query with a date range and a list of domains to search within.
+# 
+# These models **restructure** the user's query by including a <u>rewritten query</u>, a <u>range of published dates</u>, and a <u>list of domains</u> to search in.
+# 
+
+# Using the new restructured query, we can apply this pattern to our function calls to obtain results that are optimized for our backend.
+# 
+
+# In[5]:
+
+
+def expand_query(q) -> Query:
+    return client.chat.completions.create(
+        model="gpt-3.5-turbo",
+        response_model=Query,
+        messages=[
+            {
+                "role": "system",
+                "content": f"You're a query understanding system for the Metafor Systems search engine. Today is {date.today()}. Here are some tips: ...",
+            },
+            {"role": "user", "content": f"query: {q}"},
+        ],
+    )
+
+
+query = expand_query("What are some recent developments in AI?")
+query
+
+
+# This isn't just about adding some date ranges. We can even use some chain of thought prompting to generate tailored searches that are deeply integrated with our backend.
+# 
+
+# In[6]:
+
+
+class DateRange(BaseModel):
+    chain_of_thought: str = Field(
+        description="Think step by step to plan what is the best time range to search in"
+    )
+    start: date
+    end: date
+
+
+class Query(BaseModel):
+    rewritten_query: str = Field(
+        description="Rewrite the query to make it more specific"
+    )
+    published_daterange: DateRange = Field(
+        description="Effective date range to search in"
+    )
+
+
+def expand_query(q) -> Query:
+    return client.chat.completions.create(
+        model="gpt-4-1106-preview",
+        response_model=Query,
+        messages=[
+            {
+                "role": "system",
+                "content": f"You're a query understanding system for the Metafor Systems search engine. Today is {date.today()}. Here are some tips: ...",
+            },
+            {"role": "user", "content": f"query: {q}"},
+        ],
+    )
+
+
+expand_query("What are some recent developments in AI?")
+
+
+# ## Using Weights and Biases to track experiments
+# 
+# While running a function like this production is quite simple, a lot of time will be spend on iterating and improving the model. To do this, we can use Weights and Biases to track our experiments.
+# 
+# In order to do so we wand manage a few things
+# 
+# 1. Save input and output pairs for later
+# 2. Save the JSON schema for the response_model
+# 3. Having snapshots of the model and data allow us to compare results over time, and as we make changes to the model we can see how the results change.
+# 
+# This is particularly useful when we might want to blend a mix of synthetic and real data to evaluate our model. We can use the `wandb` library to track our experiments and save the results to a dashboard.
+# 
+
+# In[7]:
+
+
+import json
+import instructor
+
+from openai import AsyncOpenAI
+from datetime import date
+from pydantic import BaseModel, Field
+
+
+class DateRange(BaseModel):
+    chain_of_thought: str = Field(
+        description="Think step by step to plan what is the best time range to search in"
+    )
+    start: date
+    end: date
+
+
+class Query(BaseModel):
+    rewritten_query: str = Field(
+        description="Rewrite the query to make it more specific"
+    )
+    published_daterange: DateRange = Field(
+        description="Effective date range to search in"
+    )
+
+    def report(self):
+        dct = self.model_dump()
+        dct["usage"] = self._raw_response.usage.model_dump()
+        return dct
+
+
+
+# We'll use a different client for async calls
+# To highlight the difference and how we can use both
+aclient = instructor.patch(AsyncOpenAI())
+
+
+async def expand_query(
+    q, *, model: str = "gpt-4-1106-preview", temp: float = 0
+) -> Query:
+    return await aclient.chat.completions.create(
+        model=model,
+        temperature=temp,
+        response_model=Query,
+        messages=[
+            {
+                "role": "system",
+                "content": f"You're a query understanding system for the Metafor Systems search engine. Today is {date.today()}. Here are some tips: ...",
+            },
+            {"role": "user", "content": f"query: {q}"},
+        ],
+    )
+
+
+# In[8]:
+
+
+# % pip install pandas wandb
+import pandas as pd
+from typing import List, Dict, Any
+
+
+def flatten_dict(d: Dict[str, Any], parent_key: str = "", sep: str = "_") -> Dict[str, Any]:
+    """
+    Flatten a nested dictionary.
+
+    :param d: The nested dictionary to flatten.
+    :param parent_key: The base key to use for the flattened keys.
+    :param sep: Separator to use between keys.
+    :return: A flattened dictionary.
+    """
+    items = []
+    for k, v in d.items():
+        new_key = f"{parent_key}{sep}{k}" if parent_key else k
+        if isinstance(v, dict):
+            items.extend(flatten_dict(v, new_key, sep=sep).items())
+        else:
+            items.append((new_key, v))
+    return dict(items)
+
+
+def dicts_to_df(list_of_dicts: List[Dict[str, Any]]) -> pd.DataFrame:
+    """
+    Convert a list of dictionaries to a pandas DataFrame.
+
+    :param list_of_dicts: List of dictionaries, potentially nested.
+    :return: A pandas DataFrame representing the flattened data.
+    """
+    # Flatten each dictionary and create a DataFrame
+    flattened_data = [flatten_dict(d) for d in list_of_dicts]
+    return pd.DataFrame(flattened_data)
+
+
+# In[9]:
+
+
+import asyncio
+import time
+import pandas as pd
+import wandb
+
+model = "gpt-4-1106-preview"
+temp = 0
+
+run = wandb.init(
+    project="query",
+    config={"model": model, "temp": temp},
+)
+
+test_queries = [
+    "latest developments in artificial intelligence last 3 weeks",
+    "renewable energy trends past month",
+    "quantum computing advancements last 2 months",
+    "biotechnology updates last 10 days",
+]
+start = time.perf_counter()
+queries = await asyncio.gather(
+    *[expand_query(q, model=model, temp=temp) for q in test_queries]
+)
+duration = time.perf_counter() - start
+
+with open("schema.json", "w+") as f:
+    schema = Query.model_json_schema()
+    json.dump(schema, f, indent=2)
+
+with open("results.jsonlines", "w+") as f:
+    for query in queries:
+        f.write(query.model_dump_json() + "\n")
+
+df = dicts_to_df([q.report() for q in queries])
+df["input"] = test_queries
+df.to_csv("results.csv")
+
+
+run.log({"schema": wandb.Table(dataframe=pd.DataFrame([{"schema": schema}]))})
+run.log(
+    {
+        "usage_total_tokens": df["usage_total_tokens"].sum(),
+        "usage_completion_tokens": df["usage_completion_tokens"].sum(),
+        "usage_prompt_tokens": df["usage_prompt_tokens"].sum(),
+        "duration (s)": duration,
+        "average duration (s)": duration / len(queries),
+        "n_queries": len(queries),
+    }
+)
+
+run.log(
+    {
+        "results": wandb.Table(dataframe=df),
+    }
+)
+
+files = wandb.Artifact("data", type="dataset")
+files.add_file("schema.json")
+files.add_file("results.jsonlines")
+files.add_file("results.csv")
+
+run.log_artifact(files)
+run.finish()
+
+
+# The output of Weights and Biases would return something like the below table.
+# 
+# | Metric                   | Value  |
+# |--------------------------|--------|
+# | average duration (s)     | 1.5945 |
+# | duration (s)             | 6.37799|
+# | n_queries                | 4      |
+# | usage_completion_tokens  | 376    |
+# | usage_prompt_tokens      | 780    |
+# | usage_total_tokens       | 1156   |
+# 
+
+# ### Example 3) Personal Assistants, parallel processing
+# 
+# A personal assistant application needs to interpret vague queries and fetch information from multiple backends, such as emails and calendars. By modeling the assistant's capabilities using Pydantic, we can dispatch the query to the correct backend and retrieve a unified response.
+# 
+# For instance, when you ask, "What's on my schedule today?", the application needs to fetch data from various sources like events, emails, and reminders. This data is stored across different backends, but the goal is to provide a consolidated summary of results.
+# 
+# It's important to note that the data from these sources may not be embedded in a search backend. Instead, they could be accessed through different clients like a calendar or email, spanning both personal and professional accounts.
+# 
+
+# In[10]:
+
+
+from typing import Literal
+
+
+class SearchClient(BaseModel):
+    query: str = Field(description="The search query that will go into the search bar")
+    keywords: List[str]
+    email: str
+    source: Literal["gmail", "calendar"]
+    date_range: DateRange
+
+
+class Retrieval(BaseModel):
+    queries: List[SearchClient]
+
+
+# Now, we can utilize this with a straightforward query such as "What do I have today?".
+# 
+# The system will attempt to asynchronously dispatch the query to the appropriate backend.
+# 
+# However, it's still crucial to remember that effectively prompting the language model is still a key aspect.
+# 
+
+# In[11]:
+
+
+retrieval = client.chat.completions.create(
+    model="gpt-3.5-turbo",
+    response_model=Retrieval,
+    messages=[
+        {
+            "role": "system",
+            "content": f"""You are Jason's personal assistant.
+                He has two emails jason@work.com jason@personal.com
+                Today is {date.today()}""",
+        },
+        {"role": "user", "content": "What do I have today for work? any new emails?"},
+    ],
+)
+print(retrieval.model_dump_json(indent=4))
+
+
+# To make it more challenging, we will assign it multiple tasks, followed by a list of queries that are routed to various search backends, such as email and calendar. Not only do we dispatch to different backends, over which we have no control, but we are also likely to render them to the user in different ways.
+# 
+
+# In[12]:
+
+
+retrieval = client.chat.completions.create(
+    model="gpt-4-1106-preview",
+    response_model=Retrieval,
+    messages=[
+        {
+            "role": "system",
+            "content": f"""You are Jason's personal assistant.
+                He has two emails jason@work.com jason@personal.com
+                Today is {date.today()}""",
+        },
+        {
+            "role": "user",
+            "content": "What meetings do I have today and are there any important emails I should be aware of",
+        },
+    ],
+)
+print(retrieval.model_dump_json(indent=4))
+
+
+# ### Example 4) Decomposing questions
+# 
+# Lastly, a lightly more complex example of a problem that can be solved with structured output is decomposing questions. Where you ultimately want to decompose a question into a series of sub-questions that can be answered by a search backend. For example
+# 
+# "Whats the difference in populations of jason's home country and canada?"
+# 
+# You'd ultimately need to know a few things
+# 
+# 1. Jason's home country
+# 2. The population of Jason's home country
+# 3. The population of Canada
+# 4. The difference between the two
+# 
+# This would not be done correctly as a single query, nor would it be done in parallel, however there are some opportunities try to be parallel since not all of the sub-questions are dependent on each other.
+# 
+
+# In[13]:
+
+
+class Question(BaseModel):
+    id: int = Field(..., description="A unique identifier for the question")
+    query: str = Field(..., description="The question decomposited as much as possible")
+    subquestions: List[int] = Field(
+        default_factory=list,
+        description="The subquestions that this question is composed of",
+    )
+
+
+class QueryPlan(BaseModel):
+    root_question: str = Field(..., description="The root question that the user asked")
+    plan: List[Question] = Field(
+        ..., description="The plan to answer the root question and its subquestions"
+    )
+
+
+retrieval = client.chat.completions.create(
+    model="gpt-4-1106-preview",
+    response_model=QueryPlan,
+    messages=[
+        {
+            "role": "system",
+            "content": "You are a query understanding system capable of decomposing a question into subquestions.",
+        },
+        {
+            "role": "user",
+            "content": "What is the difference between the population of jason's home country and canada?",
+        },
+    ],
+)
+
+print(retrieval.model_dump_json(indent=4))
+
+
+# I hope in this section I've exposed you to some ways we can be creative in modeling structured outputs to leverage LLMS in building some lightweight components for our systems.
+# 
+
+--------------------------------------------------------------------------------
+
+File: /Users/hypocrite/Documents/MasterDocs/RelevantPythonScripts/2_JupyterCookbookScripts/Instructor-cookbook-scripts/5-knowledge-graphs.py.py
+Language: python
+Code:
+#!/usr/bin/env python
+# coding: utf-8
+
+# # Knowledge Graphs for Complex Topics
+
+# # Introduction
+# 
+# **What is a knowledge graph?**
+# 
+# A knowledge graph, also known as a semantic network, represents real-world entities and their relationships. It consists of nodes, edges, and labels. Nodes can represent any entity, while edges define the connections between them. For example, a node representing an author like "J.K. Rowling" can be connected to another node representing one of her books, "Harry Potter", with the edge "author of".
+# 
+# **Applications of knowledge graphs**
+# 
+# Knowledge graphs have various applications, including:
+# 
+# -  Search Engines: They enhance search results by incorporating semantic-search information from diverse sources.
+# -  Recommendation Systems: They suggest products or services based on user behavior and preferences.
+# -  Natural Language Processing: They aid in understanding and generating human language.
+# -  Data Integration: They facilitate the integration of data from different sources by identifying relationships.
+# -  Artificial Intelligence and Machine Learning: They provide contextual information to improve decision-making.
+
+# ----
+
+# ## Setup and Dependencies
+
+# Today, we're going to use the [`instructor`](https://github.com/jxnl/instructor) library to simplify the interaction between OpenAI and our code. Along with [Graphviz](https://graphviz.org) library to bring structure to our intricate subjects and have a graph visualization.
+# 
+
+# In[2]:
+
+
+import instructor 
+from openai import OpenAI
+
+client = instructor.patch(OpenAI())
+
+
+# Install the Graphviz based on your operation system https://graphviz.org/download/
+
+# ## Node and Edge Classes
+# 
+# We begin by modeling our knowledge graph with Node and Edge objects.
+# 
+# Node objects represent key concepts or entities, while Edge objects signify the relationships between them.
+
+# In[3]:
+
+
+from pydantic import BaseModel, Field
+from typing import List, Optional
+
+class Node(BaseModel):
+    id: int
+    label: str
+    color: str
+
+class Edge(BaseModel):
+    source: int
+    target: int
+    label: str
+    color: str = "black"
+
+
+# ## `KnowledgeGraph` Class
+
+# The `KnowledgeGraph` class combines nodes and edges to create a comprehensive graph structure. It includes lists of nodes and edges, where each node represents a key concept or entity, and each edge represents a relationship between two nodes.
+# 
+# Later on, you'll see that we designed this class to match the graph object in the graphviz library, which makes it easier to visualize our graph.
+# 
+# The `visualize_knowledge_graph` function is used to visualize a knowledge graph. It takes a `KnowledgeGraph` object as input, which contains nodes and edges. The function utilizes the `graphviz` library to generate a directed graph (`Digraph`). Each node and edge from the `KnowledgeGraph` is added to the `Digraph` with their respective attributes (id, label, color). Finally, the graph is rendered and displayed.
+
+# In[4]:
+
+
+from graphviz import Digraph
+from IPython.display import display
+
+class KnowledgeGraph(BaseModel):
+    nodes: List[Node] = Field(..., default_factory=list)  # A list of nodes in the knowledge graph.
+    edges: List[Edge] = Field(..., default_factory=list)  # A list of edges in the knowledge graph.
+
+
+    def visualize_knowledge_graph(self):
+        dot = Digraph(comment="Knowledge Graph")
+
+        for node in self.nodes:
+            dot.node(name=str(node.id), label=node.label, color=node.color)
+        for edge in self.edges:
+            dot.edge(str(edge.source), str(edge.target), label=edge.label, color=edge.color)
+        
+        return display(dot)
+
+
+# ## Generating the Knowledge Graph
+# 
+# ### generate_graph function
+# 
+# The ``generate_graph`` function uses OpenAI's model to create a KnowledgeGraph object from an input string.
+# 
+# It requests the model to interpret the input as a detailed knowledge graph and uses the response to form the KnowledgeGraph object.
+
+# In[8]:
+
+
+def generate_graph(input) -> KnowledgeGraph:
+    return client.chat.completions.create(
+        model="gpt-4-1106-preview",
+        messages=[
+            {
+                "role": "user",
+                "content": f"Help me understand the following by describing it as small knowledge graph: {input}",
+            }
+        ],
+        response_model=KnowledgeGraph,
+    )
+
+
+# In[9]:
+
+
+generate_graph("Explain quantum mechanics").visualize_knowledge_graph()
+
+
+# ## Advanced: Accumulating Knowledge Graphs
+# 
+# When dealing with larger datasets, or knowledge that grows over time, processing them all at once can be challenging due to limitations in prompt length or the complexity of the content. In such cases, an iterative approach to building the knowledge graph can be beneficial. This method involves processing the text in smaller, manageable chunks and updating the graph with new information from each chunk.
+# 
+# ### What are the benefits of this approach?
+# 
+# -  Scalability: This approach can handle large datasets by breaking them down into smaller, more manageable pieces.
+# 
+# -  Flexibility: It allows for dynamic updates to the graph, accommodating new information as it becomes available.
+# 
+# -  Efficiency: Processing smaller chunks of text can be more efficient and less prone to errors or omissions.
+
+# ### What has changed?
+# 
+# The previous example provided a basic structure, while this new example introduces additional complexity and functionality. The Node and Edge classes now have a __hash__ method, allowing them to be used in sets and simplifying duplicate handling.
+# 
+# The KnowledgeGraph class has been enhanced with two new methods: ``update`` and ``draw``.
+# 
+# In the KnowledgeGraph class, the nodes and edges fields are now optional, offering greater flexibility.
+# 
+# The ``update`` method enables the merging and removal of duplicates from two graphs.
+# 
+# The ``draw`` method includes a prefix parameter, making it easier to create different graph versions during iterations.
+
+# In[10]:
+
+
+class Node(BaseModel):
+    id: int
+    label: str
+    color: str
+
+    def __hash__(self) -> int:
+        return hash((id, self.label))
+    
+class Edge(BaseModel):
+    source: int
+    target: int
+    label: str
+    color: str = "black"
+
+    def __hash__(self) -> int:
+        return hash((self.source, self.target, self.label))
+
+
+# In[11]:
+
+
+class KnowledgeGraph(BaseModel):
+    # Optional list of nodes and edges in the knowledge graph
+    nodes: Optional[List[Node]] = Field(..., default_factory=list)
+    edges: Optional[List[Edge]] = Field(..., default_factory=list)
+
+    def update(self, other: "KnowledgeGraph") -> "KnowledgeGraph":
+        # This method updates the current graph with the other graph, deduplicating nodes and edges.
+        return KnowledgeGraph(
+            nodes=list(set(self.nodes + other.nodes)),  # Combine and deduplicate nodes
+            edges=list(set(self.edges + other.edges)),  # Combine and deduplicate edges
+        )
+    
+
+    def visualize_knowledge_graph(self):
+        dot = Digraph(comment="Knowledge Graph")
+
+        for node in self.nodes:
+            dot.node(str(node.id), node.label, color=node.color)
+        for edge in self.edges:
+            dot.edge(str(edge.source), str(edge.target), label=edge.label, color=edge.color)
+        
+        return display(dot)
+
+
+# 
+
+# ### Generate iterative graphs
+# 
+# The updated `generate_graph` function is specifically designed to handle a list of inputs iteratively. It updates the graph with each new piece of information.
+# 
+# Upon closer inspection, this pattern resembles a common programming technique known as a "reduce" or "fold" function. A simple example of this would be iterating over a list to find the sum of all the elements squared.
+# 
+# Here's an example in Python:
+# 
+# ```python
+# cur_state = 0
+# for i in [1, 2, 3, 4, 5]:
+#     cur_state += i**2
+# print(cur_state)
+# ```
+
+# In[12]:
+
+
+def generate_graph(input: List[str]) -> KnowledgeGraph:
+    # Initialize an empty KnowledgeGraph
+    cur_state = KnowledgeGraph()
+
+    # Iterate over the input list
+    for i, inp in enumerate(input):
+        new_updates = client.chat.completions.create(
+            model="gpt-4-1106-preview",
+            messages=[
+                {
+                    "role": "system",
+                    "content": """You are an iterative knowledge graph builder.
+                    You are given the current state of the graph, and you must append the nodes and edges 
+                    to it Do not procide any duplcates and try to reuse nodes as much as possible.""",
+                },
+                {
+                    "role": "user",
+                    "content": f"""Extract any new nodes and edges from the following:
+                    # Part {i}/{len(input)} of the input:
+
+                    {inp}""",
+                },
+                {
+                    "role": "user",
+                    "content": f"""Here is the current state of the graph:
+                    {cur_state.model_dump_json(indent=2)}""",
+                },
+            ],
+            response_model=KnowledgeGraph,
+        )  # type: ignore
+
+        # Update the current state with the new updates
+        cur_state = cur_state.update(new_updates)
+
+        # Draw the current state of the graph
+        cur_state.visualize_knowledge_graph() 
+        
+    # Return the final state of the KnowledgeGraph
+    return cur_state
+
+
+# ### Examples Use Case
+
+# In this approach, we process the text in manageable chunks, one at a time.
+# 
+# This method is particularly beneficial when dealing with extensive text that may not fit into a single prompt.
+# 
+# It is especially useful in scenarios such as constructing a knowledge graph for a complex topic, where the information is distributed across multiple documents or sections.
+
+# In[13]:
+
+
+text_chunks = [
+    "Jason knows a lot about quantum mechanics. He is a physicist. He is a professor",
+    "Professors are smart.",
+    "Sarah knows Jason and is a student of his.",
+    "Sarah is a student at the University of Toronto. and UofT is in Canada.",
+]
+
+graph: KnowledgeGraph = generate_graph(text_chunks)
+
+
+# ## Conclusion
+
+# This tutorial shows how to generate and visualize a knowledge graph for complex topics. It also demonstrates how to extract graphic knowledge from the language model or provided text. The tutorial highlights the iterative process of building the knowledge graph by processing text in smaller chunks and updating the graph with new information.
+# 
+# Using this approach, we can extract various things, including:
+# 
+# 1) People and their relationships in a story.
+# 
+# ```python
+# class People(BaseModel):
+#     id: str
+#     name: str
+#     description: str
+# 
+# class Relationship(BaseModel):
+#     id: str
+#     source: str
+#     target: str
+#     label: str
+#     description: str
+# 
+# class Story(BaseModel):
+#     people: List[People]
+#     relationships: List[Relationship]
+# ```
+# 
+# 2) Task dependencies and action items from a transcript.
+# 
+# ```python
+# class Task(BaseModel):
+#     id: str
+#     name: str
+#     description: str
+# 
+# class Participant(BaseModel):
+#     id: str
+#     name: str
+#     description: str
+# 
+# class Assignment(BaseModel):
+#     id: str
+#     source: str
+#     target: str
+#     label: str
+#     description: str
+# 
+# class Transcript(BaseModel):
+#     tasks: List[Task]
+#     participants: List[Participant]
+#     assignments: List[Assignment]
+# ```
+# 
+# 3) Key concepts and their relationships from a research paper.
+# 4) Entities and their relationships from a news article.
+# 
+# As an exercise, try to implement one of the above examples.
+# 
+# All of them will follow an idea of iteratively extracting more and more information and accumulating it into some state.
+
+--------------------------------------------------------------------------------
+
+File: /Users/hypocrite/Documents/MasterDocs/RelevantPythonScripts/2_JupyterCookbookScripts/Instructor-cookbook-scripts/3-1-validation-rag.py.py
+Language: python
+Code:
+#!/usr/bin/env python
+# coding: utf-8
+
+# # Understanding Validators
+# 
+
+# Pydantic offers an customizable and expressive validation framework for Python. Instructor leverages Pydantic's validation framework to provide a uniform developer experience for both code-based and LLM-based validation, as well as a reasking mechanism for correcting LLM outputs based on validation errors. To learn more check out the Pydantic [docs](https://docs.pydantic.dev/latest/) on validators.
+# 
+# Then we'll bring it all together into the context of RAG from the previous notebook.
+# 
+
+# Validators will enable us to control outputs by defining a function like so:
+# 
+# ```python
+# def validation_function(value):
+#     if condition(value):
+#         raise ValueError("Value is not valid")
+#     return mutation(value)
+# ```
+# 
+# Before we get started lets go over the general shape of a validator:
+# 
+
+# ## Defining Validator Functions
+# 
+
+# In[18]:
+
+
+from typing_extensions import Annotated
+from pydantic import BaseModel, AfterValidator, WithJsonSchema
+
+
+def name_must_contain_space(v: str) -> str:
+    if " " not in v:
+        raise ValueError("Name must contain a space.")
+    return v
+
+def uppercase_name(v: str) -> str:
+    return v.upper()
+
+FullName = Annotated[
+    str, 
+    AfterValidator(name_must_contain_space), 
+    AfterValidator(uppercase_name),
+    WithJsonSchema(
+        {
+            "type": "string",
+            "description": "The user's full name",
+        }
+    )]
+
+class UserDetail(BaseModel):
+    age: int
+    name: FullName
+
+
+# In[19]:
+
+
+UserDetail(age=30, name="Jason Liu")
+
+
+# In[20]:
+
+
+UserDetail.model_json_schema()
+
+
+# In[21]:
+
+
+try:
+    person = UserDetail.model_validate({"age": 24, "name": "Jason"})
+except Exception as e:
+    print(e)
+
+
+# ## Using Field
+# 
+# We can also use the `Field` class to define validators. This is useful when we want to define a validator for a field that is primative, like a string or integer which supports a limited number of validators.
+# 
+
+# In[22]:
+
+
+from pydantic import Field
+
+
+Age = Annotated[int, Field(gt=0)]
+
+class UserDetail(BaseModel):
+    age: Age
+    name: FullName
+
+try:
+    person = UserDetail(age=-10, name="Jason")
+except Exception as e:
+    print(e)
+
+
+# ## Providing Context
+# 
+
+# In[7]:
+
+
+from pydantic import ValidationInfo
+
+
+def message_cannot_have_blacklisted_words(v: str, info: ValidationInfo) -> str:
+    blacklist = info.context.get("blacklist", [])
+    for word in blacklist:
+        assert word not in v.lower(), f"`{word}` was found in the message `{v}`"
+    return v
+
+ModeratedStr = Annotated[str, AfterValidator(message_cannot_have_blacklisted_words)]
+
+class Response(BaseModel):
+    message: ModeratedStr
+
+
+try:
+    Response.model_validate(
+        {"message": "I will hurt them."},
+        context={
+            "blacklist": {
+                "rob",
+                "steal",
+                "hurt",
+                "kill",
+                "attack",
+            }
+        },
+    )
+except Exception as e:
+    print(e)
+
+
+# ## Using OpenAI Moderation
+# 
+
+# To enhance our validation measures, we'll extend the scope to flag any answer that contains hateful content, harassment, or similar issues. OpenAI offers a moderation endpoint that addresses these concerns, and it's freely available when using OpenAI models.
+# 
+
+# With the `instructor` library, this is just one function edit away:
+# 
+
+# In[13]:
+
+
+from typing import Annotated
+from pydantic import AfterValidator
+from instructor import openai_moderation
+
+import instructor
+from openai import OpenAI
+
+client = instructor.patch(OpenAI())
+
+# This uses Annotated which is a new feature in Python 3.9
+# To define custom metadata for a type hint.
+ModeratedStr = Annotated[str, AfterValidator(openai_moderation(client=client))]
+
+
+class Response(BaseModel):
+    message: ModeratedStr
+
+
+try:
+    Response(message="I want to make them suffer the consequences")
+except Exception as e:
+    print(e)
+
+
+# ## General Validator
+# 
+
+# In[ ]:
+
+
+from instructor import llm_validator
+
+HealthTopicStr = Annotated[
+    str,
+    AfterValidator(
+        llm_validator(
+            "don't talk about any other topic except health best practices and topics",
+            client=client,
+        )
+    ),
+]
+
+
+class AssistantMessage(BaseModel):
+    message: HealthTopicStr
+
+
+AssistantMessage(
+    message="I would suggest you to visit Sicily as they say it is very nice in winter."
+)
+
+
+# ### Avoiding hallucination with citations
+# 
+
+# When incorporating external knowledge bases, it's crucial to ensure that the agent uses the provided context accurately and doesn't fabricate responses. Validators can be effectively used for this purpose. We can illustrate this with an example where we validate that a provided citation is actually included in the referenced text chunk:
+# 
+
+# In[27]:
+
+
+from pydantic import ValidationInfo
+
+def citation_exists(v: str, info: ValidationInfo):
+    context = info.context
+    if context:
+        context = context.get("text_chunk")
+        if v not in context:
+            raise ValueError(f"Citation `{v}` not found in text, only use citations from the text.")
+    return v
+
+Citation = Annotated[str, AfterValidator(citation_exists)]
+
+
+class AnswerWithCitation(BaseModel):
+    answer: str
+    citation: Citation
+
+try:
+    AnswerWithCitation.model_validate(
+        {
+            "answer": "Blueberries are packed with protein",
+            "citation": "Blueberries contain high levels of protein",
+        },
+        context={"text_chunk": "Blueberries are very rich in antioxidants"},
+    )
+except Exception as e:
+    print(e)
+
+
+# Here we assume that there is a "text_chunk" field that contains the text that the model is supposed to use as context. We then use the `field_validator` decorator to define a validator that checks if the citation is included in the text chunk. If it's not, we raise a `ValueError` with a message that will be returned to the user.
+# 
+# 
+# If we want to pass in the context through the `chat.completions.create`` endpoint, we can use the `validation_context` parameter
+# 
+# ```python
+# resp = client.chat.completions.create(
+#     model="gpt-3.5-turbo",
+#     response_model=AnswerWithCitation,
+#     messages=[
+#         {"role": "user", "content": f"Answer the question `{q}` using the text chunk\n`{text_chunk}`"},
+#     ],
+#     validation_context={"text_chunk": text_chunk},
+# )
+# ```
+
+# In practice there are many ways to implement this: we could use a regex to check if the citation is included in the text chunk, or we could use a more sophisticated approach like a semantic similarity check. The important thing is that we have a way to validate that the model is using the provided context accurately.
+# 
+
+# ## Reasking with validators
+# 
+# For most of these examples all we've done we've mostly only defined the validation logic. Which can be seperate from generation, however when we are given validation errors, we shouldn't end there! Instead instructor allows us to collect all the validation errors and reask the llm to rewrite their answer.
+# 
+# Lets try to use a extreme example to illustrate this point:
+# 
+
+# In[15]:
+
+
+class QuestionAnswer(BaseModel):
+    question: str
+    answer: str
+
+
+question = "What is the meaning of life?"
+context = (
+    "The according to the devil the meaning of life is a life of sin and debauchery."
+)
+
+
+resp = client.chat.completions.create(
+    model="gpt-3.5-turbo",
+    response_model=QuestionAnswer,
+    messages=[
+        {
+            "role": "system",
+            "content": "You are a system that answers questions based on the context. answer exactly what the question asks using the context.",
+        },
+        {
+            "role": "user",
+            "content": f"using the context: `{context}`\n\nAnswer the following question: `{question}`",
+        },
+    ],
+)
+
+print(resp.model_dump_json(indent=2))
+
+
+# In[20]:
+
+
+from instructor import llm_validator
+
+
+NotEvilAnswer = Annotated[
+    str,
+    AfterValidator(
+        llm_validator("don't say objectionable things", client=client)
+    ),
+]
+
+
+class QuestionAnswer(BaseModel):
+    question: str
+    answer: NotEvilAnswer
+
+
+resp = client.chat.completions.create(
+    model="gpt-3.5-turbo",
+    response_model=QuestionAnswer,
+    max_retries=2,
+    messages=[
+        {
+            "role": "system",
+            "content": "You are a system that answers questions based on the context. answer exactly what the question asks using the context.",
+        },
+        {
+            "role": "user",
+            "content": f"using the context: `{context}`\n\nAnswer the following question: `{question}`",
+        },
+    ],
+)
+
+
+# In[21]:
+
+
+print(resp.model_dump_json(indent=2))
+
+
+--------------------------------------------------------------------------------
+

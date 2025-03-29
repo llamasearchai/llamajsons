@@ -1,0 +1,84 @@
+{
+  "name": "drug-suggestor",
+  "version": "0.0.0",
+  "summary": "Suggest Drugs based on symptoms or images or description",
+  "description": "",
+  "author": "Vamsidhar Reddy",
+  "author_email": "r.vamsireddy93@gmail.com",
+  "license": "",
+  "project_url": "https://pypi.org/project/drug-suggestor/",
+  "homepage": "",
+  "requires_python": ">=3.11,<3.12",
+  "dependencies": [
+    "pydantic",
+    "langchain"
+  ],
+  "files": {
+    "python": [
+      "src/drug_suggestor/__init__.py",
+      "src/drug_suggestor/__version__.py",
+      "src/drug_suggestor/main.py",
+      "src/drug_suggestor/v1/__init__.py",
+      "src/drug_suggestor/v1/main.py",
+      "src/drug_suggestor/v1/models/patient.py",
+      "src/drug_suggestor/v1/models/drug.py",
+      "src/drug_suggestor/v1/models/__init__.py",
+      "src/drug_suggestor/v1/models/disease.py",
+      "src/drug_suggestor/v1/templates/__init__.py"
+    ],
+    "documentation": [
+      "LICENSE.md",
+      "README.md"
+    ],
+    "tests": [],
+    "configuration": [
+      "pyproject.toml"
+    ],
+    "data": [],
+    "other": [
+      "PKG-INFO"
+    ]
+  },
+  "metadata": {
+    "author": "Vamsidhar Reddy",
+    "author_email": "r.vamsireddy93@gmail.com",
+    "bugtrack_url": null,
+    "classifiers": [
+      "Programming Language :: Python :: 3",
+      "Programming Language :: Python :: 3.11"
+    ],
+    "description": "",
+    "description_content_type": "text/markdown",
+    "docs_url": null,
+    "download_url": "",
+    "downloads": {
+      "last_day": -1,
+      "last_month": -1,
+      "last_week": -1
+    },
+    "dynamic": null,
+    "home_page": "",
+    "keywords": "",
+    "license": "",
+    "license_expression": null,
+    "license_files": null,
+    "maintainer": "",
+    "maintainer_email": "",
+    "name": "drug-suggestor",
+    "package_url": "https://pypi.org/project/drug-suggestor/",
+    "platform": null,
+    "project_url": "https://pypi.org/project/drug-suggestor/",
+    "project_urls": null,
+    "provides_extra": null,
+    "release_url": "https://pypi.org/project/drug-suggestor/0.0.0/",
+    "requires_dist": [
+      "pydantic (>=2.4.2,<3.0.0)",
+      "langchain (>=0.0.345,<0.0.346)"
+    ],
+    "requires_python": ">=3.11,<3.12",
+    "summary": "Suggest Drugs based on symptoms or images or description",
+    "version": "0.0.0",
+    "yanked": false,
+    "yanked_reason": null
+  }
+}

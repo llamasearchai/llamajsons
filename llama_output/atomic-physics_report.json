@@ -1,0 +1,113 @@
+{
+  "name": "atomic-physics",
+  "version": "2.0.3",
+  "summary": "Lightweight python library for calculations based on atomic structure",
+  "description": "",
+  "author": "hartytp",
+  "author_email": "thomas.peter.harty@gmail.com",
+  "license": null,
+  "project_url": "https://pypi.org/project/atomic-physics/",
+  "homepage": null,
+  "requires_python": "<3.11,>=3.10",
+  "dependencies": [
+    "numpy<2.0.0,>=1.22.0",
+    "scipy<2.0.0,>=1.7.3"
+  ],
+  "files": {
+    "python": [
+      "setup.py",
+      "atomic_physics/wigner.py",
+      "atomic_physics/__init__.py",
+      "atomic_physics/core.py",
+      "atomic_physics/utils.py",
+      "atomic_physics/polarization.py",
+      "atomic_physics/operators.py",
+      "atomic_physics/rate_equations.py",
+      "atomic_physics/atoms/two_state.py",
+      "atomic_physics/atoms/__init__.py",
+      "atomic_physics/tests/test_utils.py",
+      "atomic_physics/tests/test_atom_factory.py",
+      "atomic_physics/tests/test_atoms.py",
+      "atomic_physics/tests/test_two_state_atom.py",
+      "atomic_physics/tests/test_stim.py",
+      "atomic_physics/tests/test_operators.py",
+      "atomic_physics/tests/__init__.py",
+      "atomic_physics/tests/test_polarization.py",
+      "atomic_physics/tests/test_rates.py",
+      "atomic_physics/tests/test_ca43.py",
+      "atomic_physics/tests/test_wigner.py",
+      "atomic_physics/tests/utils.py",
+      "atomic_physics/tests/test_spin_half.py",
+      "atomic_physics/tests/test_mg25.py",
+      "atomic_physics/tests/test_spont.py",
+      "atomic_physics/tests/test_atom.py",
+      "atomic_physics/tests/test_examples.py",
+      "atomic_physics/tests/test_level_data.py",
+      "atomic_physics/examples/clock_qubits.py",
+      "atomic_physics/examples/__init__.py",
+      "atomic_physics/examples/ca_shelving.py",
+      "atomic_physics/examples/breit_rabi.py",
+      "atomic_physics/examples/M1_transitions.py",
+      "atomic_physics/ions/ca40.py",
+      "atomic_physics/ions/ba135.py",
+      "atomic_physics/ions/__init__.py",
+      "atomic_physics/ions/ba133.py",
+      "atomic_physics/ions/ba137.py",
+      "atomic_physics/ions/ca43.py",
+      "atomic_physics/ions/sr88.py",
+      "atomic_physics/ions/mg25.py",
+      "atomic_physics/ions/ba138.py"
+    ],
+    "documentation": [],
+    "tests": [],
+    "configuration": [
+      "pyproject.toml"
+    ],
+    "data": [],
+    "other": [
+      "PKG-INFO"
+    ]
+  },
+  "metadata": {
+    "author": "hartytp",
+    "author_email": "thomas.peter.harty@gmail.com",
+    "bugtrack_url": null,
+    "classifiers": [
+      "Programming Language :: Python :: 3",
+      "Programming Language :: Python :: 3.10"
+    ],
+    "description": "",
+    "description_content_type": null,
+    "docs_url": null,
+    "download_url": null,
+    "downloads": {
+      "last_day": -1,
+      "last_month": -1,
+      "last_week": -1
+    },
+    "dynamic": null,
+    "home_page": null,
+    "keywords": null,
+    "license": null,
+    "license_expression": null,
+    "license_files": null,
+    "maintainer": null,
+    "maintainer_email": null,
+    "name": "atomic-physics",
+    "package_url": "https://pypi.org/project/atomic-physics/",
+    "platform": null,
+    "project_url": "https://pypi.org/project/atomic-physics/",
+    "project_urls": null,
+    "provides_extra": null,
+    "release_url": "https://pypi.org/project/atomic-physics/2.0.3/",
+    "requires_dist": [
+      "numpy<2.0.0,>=1.22.0",
+      "scipy<2.0.0,>=1.7.3"
+    ],
+    "requires_python": "<3.11,>=3.10",
+    "summary": "Lightweight python library for calculations based on atomic structure",
+    "version": "2.0.3",
+    "yanked": false,
+    "yanked_reason": null
+  }
+}

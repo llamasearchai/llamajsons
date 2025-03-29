@@ -1,0 +1,131 @@
+Package: drug-resolver v0.0.5
+================================================================================
+
+BASIC INFORMATION
+--------------------------------------------------------------------------------
+Summary: A tool to resolve messy drug names in biomedical datasets to standard identifiers
+Requires Python: >=3.10
+
+DEPENDENCIES
+--------------------------------------------------------------------------------
+- check-manifest;
+- pytest-mock;
+- pytest;
+- rdkit>=2022.9.4
+- requests-cache<1,>=0.9.7
+- requests<3,>=2.28.1
+- tox;
+- xmltodict==0.13.0
+
+PACKAGE STRUCTURE
+--------------------------------------------------------------------------------
+
+PYTHON (7 files):
+- setup.py
+- src/__init__.py
+- src/drug_resolver/__init__.py
+- src/drug_resolver/core.py
+- src/drug_resolver/core_test.py
+- src/drug_resolver/requests_wrapper.py
+- src/drug_resolver/utils.py
+
+DOCUMENTATION (5 files):
+- README.md
+- src/drug_resolver.egg-info/SOURCES.txt
+- src/drug_resolver.egg-info/dependency_links.txt
+- src/drug_resolver.egg-info/requires.txt
+- src/drug_resolver.egg-info/top_level.txt
+
+CONFIGURATION (2 files):
+- pyproject.toml
+- setup.cfg
+
+OTHER (2 files):
+- PKG-INFO
+- src/drug_resolver.egg-info/PKG-INFO
+
+DESCRIPTION
+--------------------------------------------------------------------------------
+# Drug Resolver
+
+This package offers a simple way to resolve drug names to their corresponding PubChem entries.
+
+This is useful for identifying unknown drug synonyms or matching drug synonyms across different datasets in an automated way.
+
+
+## Installation
+
+```sh
+pip install drug-resolver
+```
+
+## Usage
+
+```python
+from drug_resolver import resolve_drug
+
+d1 = resolve_drug("tetracycline hcl")
+print(d1)
+"""
+ResolvedDrug(
+   name='Tetracycline hydrochloride', 
+   pubchem_compound_id='54704426', 
+   pubchem_substance_id='103591391', 
+   smiles='CN(C)C1C(=O)C(C(N)=O)=C(O)C2(O)C(=O)C3=C(O)c4c(O)cccc4C(C)(O)C3CC12.Cl', 
+   drug_classes=None, 
+   fda_approval=<FDAApprovalStatus.APPROVED: 'APPROVED'>, 
+   pubchem_parent_compound_id='54675776')
+"""
+
+d2 = resolve_drug("Sumycin")
+print(d2)
+"""
+ResolvedDrug(
+    name='Tetracycline', 
+    pubchem_compound_id='54675776', 
+    pubchem_substance_id='124766046', 
+    smiles='CN(C)C1C(=O)C(C(N)=O)=C(O)C2(O)C(=O)C3=C(O)c4c(O)cccc4C(C)(O)C3CC12', 
+    drug_classes=frozenset({'Established Pharmacologic Class [EPC] - Tetracycline-class Antimicrobial'}), 
+    fda_approval=<FDAApprovalStatus.APPROVED: 'APPROVED'>, 
+    pubchem_parent_compound_id=None)
+"""
+
+assert d1 == d2 # True
+```
+
+The equality operator between `ResolvedDrug` objects will return `True` under the following conditions:
+
+- The `pubchem_compound_id` attribute is the same
+- The `pubchem_substance_id` attribute is the same
+- The `smiles` strings refer to the same molecule
+- Two compounds share the same `pubchem_parent_compound_id` or the `pubchem_compound_id` is the same as the `pubchem_parent_compound_id` of the other compound.
+
+## Caching
+
+You can set the env variable `DRUG_RESOLVER_REQUEST_CACHE` to a filename. A sqlite database will be created
+at the filename and all PubChem requests will be cached there. This is useful for avoiding repeated requests
+to the PubChem API. By default, the cache will be stored in memory and will be lost when the program exits.
+
+Here is an example of the cache works:
+
+```commandline
+(.venv) drug-name-resolver % DRUG_RESOLVER_REQUEST_CACHE=/tmp/test.sqlite3 ipython
+Python 3.11.11 (main, Dec  3 2024, 17:20:40) [Clang 16.0.0 (clang-1600.0.26.4)]
+
+In [1]: from drug_resolver import resolve_drug
+
+In [2]: %time d1 = resolve_drug("tetracycline hcl")
+CPU times: user 48.1 ms, sys: 10.7 ms, total: 58.8 ms
+Wall time: 1.53 s
+(.venv)  drug-name-resolver % ls -lh /tmp/test.sqlite3
+-rw-r--r--@ 1 quinnj2  wheel   468K Jan 30 14:51 /tmp/test.sqlite3
+(.venv) drug-name-resolver % DRUG_RESOLVER_REQUEST_CACHE=/tmp/test.sqlite3 ipython
+Python 3.11.11 (main, Dec  3 2024, 17:20:40) [Clang 16.0.0 (clang-1600.0.26.4)]
+
+In [1]: from drug_resolver import resolve_drug
+
+In [2]: %time d1 = resolve_drug("tetracycline hcl")
+CPU times: user 24.2 ms, sys: 4.06 ms, total: 28.3 ms
+Wall time: 29.3 ms
+```
+

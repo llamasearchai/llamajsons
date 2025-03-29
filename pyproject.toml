@@ -1,0 +1,42 @@
+[build-system]
+requires = ["setuptools>=42", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "llama-explorer"
+version = "1.0.0"
+description = "Extract, analyze and explore PyPI packages with style"
+readme = "README.md"
+authors = [
+    {name = "Llama Explorer Team"}
+]
+license = {text = "MIT"}
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+requires-python = ">=3.7"
+dependencies = [
+    "aiofiles>=0.8.0",
+    "chardet>=4.0.0",
+    "click>=8.0.0",
+    "requests>=2.25.0",
+    "pydantic>=1.9.0",
+    "rich>=12.0.0",
+    "structlog>=21.0.0",
+    "markdown2>=2.4.0",
+    "beautifulsoup4>=4.10.0",
+]
+
+[project.optional-dependencies]
+pdf = ["pdfkit>=1.0.0"]
+scraper = ["cloudscraper>=1.2.60"]
+all = ["pdfkit>=1.0.0", "cloudscraper>=1.2.60"]
+
+[project.scripts]
+llama-explorer = "llama_explorer.__main__:main_cli"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+packages = ["llama_explorer"] 

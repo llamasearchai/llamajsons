@@ -1,0 +1,93 @@
+{
+  "name": "pharmacokinetics",
+  "version": "0.1",
+  "summary": "Python tools for pharmacokinetic calculations.",
+  "description": "# pharmacokinetics\n![downloads](https://img.shields.io/pepy/dt/pharmacokinetics) ![repo-size](https://img.shields.io/github/repo-size/xyzpw/pharmacokinetics-module)\n\nThe **pharmacokinetics** package is a Python package designed to make pharmacokinetic formulas easier to calculate in your Python code.\n\n## Usage\nSome functions will use kwargs, which will allow the ability to use alternatives to values, e.g. the parameter `t12` can be used instead of `ke`, which will convert the elimination half-life to the elimination rate constant with the following formula:\n\n$\\Large{\\frac{\\ln2}{t^{1/2}}}$\n\n> [!NOTE]\n> Remember to make sure your units match!\n\n### Calculating Concentrations\nCalculating the concentration remaining after an elapsed time after peak concentration using the formula $C \\cdot e^{-k_et}$:\n```python\nimport pharmacokinetics as pk\npk.single_dose.calculateRemaining(initial_concentration=10, time_elapsed=4, t12=9)\n```\nThe above code will calculate the remaining concentration of a drug that has reached peak concentration 4 hours ago with an elimination half-life of 9 hours.\n\nThe formula to this function:<br>\n$10 \\ mg \\cdot e^{-\\frac{\\ln2}{9 \\ h}4 \\ h}=7.35 \\ mg$\n\nTo calculate the concentration at any time $T$ (oral administration), the usage is:\n```python\nimport pharmacokinetics as pk\npk.concentrationAtTime(\n    dose=200,\n    vd=0.7,\n    bioavailability=0.99,\n    t12=4.5,\n    t12abs=7/60,\n    elapsed=6\n)\n```\nThis above code follows the formula:\n\n$\\frac{F \\cdot D \\cdot k_a}{Vd(k_a - k_e)}(e^{-k_e \\cdot t} - e^{-k_a \\cdot t})$\n\nAlternatively, `interval` can be used if the drug is taken at intervals, this will use the formula:\n\n$\\Large{\\frac{F \\cdot D \\cdot k_a}{Vd(k_a - k_e)}(\\frac{e^{-k_e \\cdot t}}{1 - e^{-k_e \\cdot \\tau}} - \\frac{e^{-k_a \\cdot t}}{1 - e^{-k_a \\cdot \\tau}})}$\n\n### Solving Values\nHalf-lives can be solved if the initial concentration, remaining concentration, and time elapsed are known:\n```python\nimport pharmacokinetics as pk\npk.single_dose.halflifeFromDoses(\n    dose=15,\n    dose=9,\n    elapsed=9\n)\n```\nWhere the time elapsed is the time past since the drug has reached maximum concentration and begins the elimination phase, which will then follow the formula $C = e^{-x \\cdot 9 \\ h}$ where $x$ is the elimination rate constant. Solving for $x$ becomes $\\frac{\\ln(\\frac{9}{15})}{9} = -k_e$ to get half-life we use $\\frac{\\ln2}{|-k_e|} = 12.2 \\ h$.\n\n### Calculating Peak Time\nIf a drug's absorption and elimination constants are known, the tmax can be calculated:\n```python\nimport pharmacokinetics as pk\npk.calculateTmax(t12=9, t12abs=0.75)\n```\nThe formula to this calculation: $\\frac{1}{k_a - k_e} \\ln(\\frac{ka}{ke}) = \\frac{\\ln(\\frac{k_a}{k_e})}{k_a - k_e} = T_{max}$, which results in a tmax of 2.93 hours.\n\n## Disclaimers\nThis package uses real formulas, but that does not mean it is free from errors, for example, bugs and typos can result in inaccurate info.<br>\nIf any bugs or inaccuracies are seen, open an issue so it can be fixed.\n\n## Developers\nIf you intend to install the edited package, create a wheel file:\n```bash\n$ pip3 install setuptools # required to build package (skip if already installed)\n$ python3 -m build # builds the package to a wheel file\n```\nTo install this, I recommend creating a virtual environment:\n```bash\n$ python3 -m venv .venv # creates virtual environment\n$ source .venv/bin/activate # activates the virtual environment\n```\nNow use pip install with the file that was just created.<br>\nTo deactivate the virtual environment:\n```bash\n$ deactivate\n```\n### Contributing\nContributions must not break the code or change formulas.<br>\nContributions that can possibly be accepted:\n- fixed typos\n- fixed bugs\n- new formulas (source required)\n\n",
+  "author": "xyzpw",
+  "author_email": null,
+  "license": "MIT",
+  "project_url": "https://pypi.org/project/pharmacokinetics/",
+  "homepage": "https://github.com/xyzpw/pharmacokinetics-module/",
+  "requires_python": null,
+  "dependencies": [],
+  "files": {
+    "python": [
+      "setup.py",
+      "pharmacokinetics/__init__.py",
+      "pharmacokinetics/multiple_doses/__init__.py",
+      "pharmacokinetics/multiple_doses/recommended.py",
+      "pharmacokinetics/multiple_doses/cmax.py",
+      "pharmacokinetics/single_dose/concentration.py",
+      "pharmacokinetics/single_dose/__init__.py",
+      "pharmacokinetics/single_dose/halflife.py",
+      "pharmacokinetics/_handlers/__init__.py",
+      "pharmacokinetics/shared_formulas/concentration.py",
+      "pharmacokinetics/shared_formulas/tmax.py",
+      "pharmacokinetics/shared_formulas/__init__.py",
+      "pharmacokinetics/shared_formulas/halflife.py"
+    ],
+    "documentation": [
+      "README.md",
+      "pharmacokinetics.egg-info/SOURCES.txt",
+      "pharmacokinetics.egg-info/top_level.txt",
+      "pharmacokinetics.egg-info/dependency_links.txt"
+    ],
+    "tests": [],
+    "configuration": [
+      "setup.cfg"
+    ],
+    "data": [],
+    "other": [
+      "PKG-INFO",
+      "LICENSE",
+      "pharmacokinetics.egg-info/PKG-INFO"
+    ]
+  },
+  "metadata": {
+    "author": "xyzpw",
+    "author_email": null,
+    "bugtrack_url": null,
+    "classifiers": [
+      "Environment :: Console",
+      "Intended Audience :: Developers",
+      "Intended Audience :: Science/Research",
+      "License :: OSI Approved :: MIT License",
+      "Programming Language :: Python :: 3.10",
+      "Programming Language :: Python :: 3.11",
+      "Programming Language :: Python :: 3.12",
+      "Topic :: Utilities"
+    ],
+    "description": "# pharmacokinetics\n![downloads](https://img.shields.io/pepy/dt/pharmacokinetics) ![repo-size](https://img.shields.io/github/repo-size/xyzpw/pharmacokinetics-module)\n\nThe **pharmacokinetics** package is a Python package designed to make pharmacokinetic formulas easier to calculate in your Python code.\n\n## Usage\nSome functions will use kwargs, which will allow the ability to use alternatives to values, e.g. the parameter `t12` can be used instead of `ke`, which will convert the elimination half-life to the elimination rate constant with the following formula:\n\n$\\Large{\\frac{\\ln2}{t^{1/2}}}$\n\n> [!NOTE]\n> Remember to make sure your units match!\n\n### Calculating Concentrations\nCalculating the concentration remaining after an elapsed time after peak concentration using the formula $C \\cdot e^{-k_et}$:\n```python\nimport pharmacokinetics as pk\npk.single_dose.calculateRemaining(initial_concentration=10, time_elapsed=4, t12=9)\n```\nThe above code will calculate the remaining concentration of a drug that has reached peak concentration 4 hours ago with an elimination half-life of 9 hours.\n\nThe formula to this function:<br>\n$10 \\ mg \\cdot e^{-\\frac{\\ln2}{9 \\ h}4 \\ h}=7.35 \\ mg$\n\nTo calculate the concentration at any time $T$ (oral administration), the usage is:\n```python\nimport pharmacokinetics as pk\npk.concentrationAtTime(\n    dose=200,\n    vd=0.7,\n    bioavailability=0.99,\n    t12=4.5,\n    t12abs=7/60,\n    elapsed=6\n)\n```\nThis above code follows the formula:\n\n$\\frac{F \\cdot D \\cdot k_a}{Vd(k_a - k_e)}(e^{-k_e \\cdot t} - e^{-k_a \\cdot t})$\n\nAlternatively, `interval` can be used if the drug is taken at intervals, this will use the formula:\n\n$\\Large{\\frac{F \\cdot D \\cdot k_a}{Vd(k_a - k_e)}(\\frac{e^{-k_e \\cdot t}}{1 - e^{-k_e \\cdot \\tau}} - \\frac{e^{-k_a \\cdot t}}{1 - e^{-k_a \\cdot \\tau}})}$\n\n### Solving Values\nHalf-lives can be solved if the initial concentration, remaining concentration, and time elapsed are known:\n```python\nimport pharmacokinetics as pk\npk.single_dose.halflifeFromDoses(\n    dose=15,\n    dose=9,\n    elapsed=9\n)\n```\nWhere the time elapsed is the time past since the drug has reached maximum concentration and begins the elimination phase, which will then follow the formula $C = e^{-x \\cdot 9 \\ h}$ where $x$ is the elimination rate constant. Solving for $x$ becomes $\\frac{\\ln(\\frac{9}{15})}{9} = -k_e$ to get half-life we use $\\frac{\\ln2}{|-k_e|} = 12.2 \\ h$.\n\n### Calculating Peak Time\nIf a drug's absorption and elimination constants are known, the tmax can be calculated:\n```python\nimport pharmacokinetics as pk\npk.calculateTmax(t12=9, t12abs=0.75)\n```\nThe formula to this calculation: $\\frac{1}{k_a - k_e} \\ln(\\frac{ka}{ke}) = \\frac{\\ln(\\frac{k_a}{k_e})}{k_a - k_e} = T_{max}$, which results in a tmax of 2.93 hours.\n\n## Disclaimers\nThis package uses real formulas, but that does not mean it is free from errors, for example, bugs and typos can result in inaccurate info.<br>\nIf any bugs or inaccuracies are seen, open an issue so it can be fixed.\n\n## Developers\nIf you intend to install the edited package, create a wheel file:\n```bash\n$ pip3 install setuptools # required to build package (skip if already installed)\n$ python3 -m build # builds the package to a wheel file\n```\nTo install this, I recommend creating a virtual environment:\n```bash\n$ python3 -m venv .venv # creates virtual environment\n$ source .venv/bin/activate # activates the virtual environment\n```\nNow use pip install with the file that was just created.<br>\nTo deactivate the virtual environment:\n```bash\n$ deactivate\n```\n### Contributing\nContributions must not break the code or change formulas.<br>\nContributions that can possibly be accepted:\n- fixed typos\n- fixed bugs\n- new formulas (source required)\n\n",
+    "description_content_type": "text/markdown",
+    "docs_url": null,
+    "download_url": null,
+    "downloads": {
+      "last_day": -1,
+      "last_month": -1,
+      "last_week": -1
+    },
+    "dynamic": null,
+    "home_page": "https://github.com/xyzpw/pharmacokinetics-module/",
+    "keywords": "pharmacokinetics, pharmacodynamics, pharmacology, pharmacy, chemistry",
+    "license": "MIT",
+    "license_expression": null,
+    "license_files": null,
+    "maintainer": null,
+    "maintainer_email": null,
+    "name": "pharmacokinetics",
+    "package_url": "https://pypi.org/project/pharmacokinetics/",
+    "platform": null,
+    "project_url": "https://pypi.org/project/pharmacokinetics/",
+    "project_urls": {
+      "Homepage": "https://github.com/xyzpw/pharmacokinetics-module/"
+    },
+    "provides_extra": null,
+    "release_url": "https://pypi.org/project/pharmacokinetics/0.1/",
+    "requires_dist": null,
+    "requires_python": null,
+    "summary": "Python tools for pharmacokinetic calculations.",
+    "version": "0.1",
+    "yanked": false,
+    "yanked_reason": null
+  }
+}

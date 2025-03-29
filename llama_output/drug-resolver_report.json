@@ -1,0 +1,104 @@
+{
+  "name": "drug-resolver",
+  "version": "0.0.5",
+  "summary": "A tool to resolve messy drug names in biomedical datasets to standard identifiers",
+  "description": "# Drug Resolver\n\nThis package offers a simple way to resolve drug names to their corresponding PubChem entries.\n\nThis is useful for identifying unknown drug synonyms or matching drug synonyms across different datasets in an automated way.\n\n\n## Installation\n\n```sh\npip install drug-resolver\n```\n\n## Usage\n\n```python\nfrom drug_resolver import resolve_drug\n\nd1 = resolve_drug(\"tetracycline hcl\")\nprint(d1)\n\"\"\"\nResolvedDrug(\n   name='Tetracycline hydrochloride', \n   pubchem_compound_id='54704426', \n   pubchem_substance_id='103591391', \n   smiles='CN(C)C1C(=O)C(C(N)=O)=C(O)C2(O)C(=O)C3=C(O)c4c(O)cccc4C(C)(O)C3CC12.Cl', \n   drug_classes=None, \n   fda_approval=<FDAApprovalStatus.APPROVED: 'APPROVED'>, \n   pubchem_parent_compound_id='54675776')\n\"\"\"\n\nd2 = resolve_drug(\"Sumycin\")\nprint(d2)\n\"\"\"\nResolvedDrug(\n    name='Tetracycline', \n    pubchem_compound_id='54675776', \n    pubchem_substance_id='124766046', \n    smiles='CN(C)C1C(=O)C(C(N)=O)=C(O)C2(O)C(=O)C3=C(O)c4c(O)cccc4C(C)(O)C3CC12', \n    drug_classes=frozenset({'Established Pharmacologic Class [EPC] - Tetracycline-class Antimicrobial'}), \n    fda_approval=<FDAApprovalStatus.APPROVED: 'APPROVED'>, \n    pubchem_parent_compound_id=None)\n\"\"\"\n\nassert d1 == d2 # True\n```\n\nThe equality operator between `ResolvedDrug` objects will return `True` under the following conditions:\n\n- The `pubchem_compound_id` attribute is the same\n- The `pubchem_substance_id` attribute is the same\n- The `smiles` strings refer to the same molecule\n- Two compounds share the same `pubchem_parent_compound_id` or the `pubchem_compound_id` is the same as the `pubchem_parent_compound_id` of the other compound.\n\n## Caching\n\nYou can set the env variable `DRUG_RESOLVER_REQUEST_CACHE` to a filename. A sqlite database will be created\nat the filename and all PubChem requests will be cached there. This is useful for avoiding repeated requests\nto the PubChem API. By default, the cache will be stored in memory and will be lost when the program exits.\n\nHere is an example of the cache works:\n\n```commandline\n(.venv) drug-name-resolver % DRUG_RESOLVER_REQUEST_CACHE=/tmp/test.sqlite3 ipython\nPython 3.11.11 (main, Dec  3 2024, 17:20:40) [Clang 16.0.0 (clang-1600.0.26.4)]\n\nIn [1]: from drug_resolver import resolve_drug\n\nIn [2]: %time d1 = resolve_drug(\"tetracycline hcl\")\nCPU times: user 48.1 ms, sys: 10.7 ms, total: 58.8 ms\nWall time: 1.53 s\n(.venv)  drug-name-resolver % ls -lh /tmp/test.sqlite3\n-rw-r--r--@ 1 quinnj2  wheel   468K Jan 30 14:51 /tmp/test.sqlite3\n(.venv) drug-name-resolver % DRUG_RESOLVER_REQUEST_CACHE=/tmp/test.sqlite3 ipython\nPython 3.11.11 (main, Dec  3 2024, 17:20:40) [Clang 16.0.0 (clang-1600.0.26.4)]\n\nIn [1]: from drug_resolver import resolve_drug\n\nIn [2]: %time d1 = resolve_drug(\"tetracycline hcl\")\nCPU times: user 24.2 ms, sys: 4.06 ms, total: 28.3 ms\nWall time: 29.3 ms\n```\n",
+  "author": null,
+  "author_email": "Jeff Quinn <quinnj2@mskcc.org>",
+  "license": null,
+  "project_url": "https://pypi.org/project/drug-resolver/",
+  "homepage": null,
+  "requires_python": ">=3.10",
+  "dependencies": [
+    "requests-cache<1,>=0.9.7",
+    "requests<3,>=2.28.1",
+    "xmltodict==0.13.0",
+    "rdkit>=2022.9.4",
+    "check-manifest;",
+    "pytest;",
+    "pytest-mock;",
+    "tox;"
+  ],
+  "files": {
+    "python": [
+      "setup.py",
+      "src/__init__.py",
+      "src/drug_resolver/__init__.py",
+      "src/drug_resolver/core.py",
+      "src/drug_resolver/core_test.py",
+      "src/drug_resolver/utils.py",
+      "src/drug_resolver/requests_wrapper.py"
+    ],
+    "documentation": [
+      "README.md",
+      "src/drug_resolver.egg-info/SOURCES.txt",
+      "src/drug_resolver.egg-info/requires.txt",
+      "src/drug_resolver.egg-info/top_level.txt",
+      "src/drug_resolver.egg-info/dependency_links.txt"
+    ],
+    "tests": [],
+    "configuration": [
+      "pyproject.toml",
+      "setup.cfg"
+    ],
+    "data": [],
+    "other": [
+      "PKG-INFO",
+      "src/drug_resolver.egg-info/PKG-INFO"
+    ]
+  },
+  "metadata": {
+    "author": null,
+    "author_email": "Jeff Quinn <quinnj2@mskcc.org>",
+    "bugtrack_url": null,
+    "classifiers": [
+      "Development Status :: 5 - Production/Stable",
+      "Programming Language :: Python :: 3 :: Only"
+    ],
+    "description": "# Drug Resolver\n\nThis package offers a simple way to resolve drug names to their corresponding PubChem entries.\n\nThis is useful for identifying unknown drug synonyms or matching drug synonyms across different datasets in an automated way.\n\n\n## Installation\n\n```sh\npip install drug-resolver\n```\n\n## Usage\n\n```python\nfrom drug_resolver import resolve_drug\n\nd1 = resolve_drug(\"tetracycline hcl\")\nprint(d1)\n\"\"\"\nResolvedDrug(\n   name='Tetracycline hydrochloride', \n   pubchem_compound_id='54704426', \n   pubchem_substance_id='103591391', \n   smiles='CN(C)C1C(=O)C(C(N)=O)=C(O)C2(O)C(=O)C3=C(O)c4c(O)cccc4C(C)(O)C3CC12.Cl', \n   drug_classes=None, \n   fda_approval=<FDAApprovalStatus.APPROVED: 'APPROVED'>, \n   pubchem_parent_compound_id='54675776')\n\"\"\"\n\nd2 = resolve_drug(\"Sumycin\")\nprint(d2)\n\"\"\"\nResolvedDrug(\n    name='Tetracycline', \n    pubchem_compound_id='54675776', \n    pubchem_substance_id='124766046', \n    smiles='CN(C)C1C(=O)C(C(N)=O)=C(O)C2(O)C(=O)C3=C(O)c4c(O)cccc4C(C)(O)C3CC12', \n    drug_classes=frozenset({'Established Pharmacologic Class [EPC] - Tetracycline-class Antimicrobial'}), \n    fda_approval=<FDAApprovalStatus.APPROVED: 'APPROVED'>, \n    pubchem_parent_compound_id=None)\n\"\"\"\n\nassert d1 == d2 # True\n```\n\nThe equality operator between `ResolvedDrug` objects will return `True` under the following conditions:\n\n- The `pubchem_compound_id` attribute is the same\n- The `pubchem_substance_id` attribute is the same\n- The `smiles` strings refer to the same molecule\n- Two compounds share the same `pubchem_parent_compound_id` or the `pubchem_compound_id` is the same as the `pubchem_parent_compound_id` of the other compound.\n\n## Caching\n\nYou can set the env variable `DRUG_RESOLVER_REQUEST_CACHE` to a filename. A sqlite database will be created\nat the filename and all PubChem requests will be cached there. This is useful for avoiding repeated requests\nto the PubChem API. By default, the cache will be stored in memory and will be lost when the program exits.\n\nHere is an example of the cache works:\n\n```commandline\n(.venv) drug-name-resolver % DRUG_RESOLVER_REQUEST_CACHE=/tmp/test.sqlite3 ipython\nPython 3.11.11 (main, Dec  3 2024, 17:20:40) [Clang 16.0.0 (clang-1600.0.26.4)]\n\nIn [1]: from drug_resolver import resolve_drug\n\nIn [2]: %time d1 = resolve_drug(\"tetracycline hcl\")\nCPU times: user 48.1 ms, sys: 10.7 ms, total: 58.8 ms\nWall time: 1.53 s\n(.venv)  drug-name-resolver % ls -lh /tmp/test.sqlite3\n-rw-r--r--@ 1 quinnj2  wheel   468K Jan 30 14:51 /tmp/test.sqlite3\n(.venv) drug-name-resolver % DRUG_RESOLVER_REQUEST_CACHE=/tmp/test.sqlite3 ipython\nPython 3.11.11 (main, Dec  3 2024, 17:20:40) [Clang 16.0.0 (clang-1600.0.26.4)]\n\nIn [1]: from drug_resolver import resolve_drug\n\nIn [2]: %time d1 = resolve_drug(\"tetracycline hcl\")\nCPU times: user 24.2 ms, sys: 4.06 ms, total: 28.3 ms\nWall time: 29.3 ms\n```\n",
+    "description_content_type": "text/markdown",
+    "docs_url": null,
+    "download_url": null,
+    "downloads": {
+      "last_day": -1,
+      "last_month": -1,
+      "last_week": -1
+    },
+    "dynamic": null,
+    "home_page": null,
+    "keywords": null,
+    "license": null,
+    "license_expression": null,
+    "license_files": null,
+    "maintainer": null,
+    "maintainer_email": "Jeff Quinn <quinnj2@mskcc.org>",
+    "name": "drug-resolver",
+    "package_url": "https://pypi.org/project/drug-resolver/",
+    "platform": null,
+    "project_url": "https://pypi.org/project/drug-resolver/",
+    "project_urls": {
+      "Homepage": "https://github.com/tansey-lab/drug-resolver",
+      "Source": "https://github.com/tansey-lab/drug-resolver"
+    },
+    "provides_extra": [
+      "dev",
+      "test"
+    ],
+    "release_url": "https://pypi.org/project/drug-resolver/0.0.5/",
+    "requires_dist": [
+      "requests-cache<1,>=0.9.7",
+      "requests<3,>=2.28.1",
+      "xmltodict==0.13.0",
+      "rdkit>=2022.9.4",
+      "check-manifest; extra == \"dev\"",
+      "pytest; extra == \"test\"",
+      "pytest-mock; extra == \"test\"",
+      "tox; extra == \"test\""
+    ],
+    "requires_python": ">=3.10",
+    "summary": "A tool to resolve messy drug names in biomedical datasets to standard identifiers",
+    "version": "0.0.5",
+    "yanked": false,
+    "yanked_reason": null
+  }
+}

@@ -1,0 +1,84 @@
+{
+  "name": "html2text-rs",
+  "version": "0.2.2",
+  "summary": "Convert HTML to markdown or plain text",
+  "description": "![Python >= 3.8](https://img.shields.io/badge/python->=3.8-red.svg) [![](https://badgen.net/github/release/deedy5/html2text_rs)](https://github.com/deedy5/html2text_rs/releases) [![](https://badge.fury.io/py/html2text_rs.svg)](https://pypi.org/project/html2text_rs) [![Downloads](https://static.pepy.tech/badge/html2text_rs/week)](https://pepy.tech/project/html2text_rs) [![CI](https://github.com/deedy5/html2text_rs/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/deedy5/html2text_rs/actions/workflows/CI.yml)\n\n# html2text_rs\nConvert HTML to markdown or plain text.</br>\nPython binding to the rust [rust-html2text](https://github.com/jugglerchris/rust-html2text) library.\n\n## Table of Contents\n\n- [Installation](#installation)\n- [Usage](#usage)\n  - [text_markdown()](#1-text_markdown)\n  - [text_plain()](#2-text_plain)\n  - [text_rich()](#3-text_rich)\n\n## Installation\n\n```python\npip install -U html2text_rs\n```\n\n## Usage\n### 1. text_markdown()\n```python\ndef text_markdown(html: str, width: int = 100):\n    \"\"\"Convert HTML to markdown text.\n\n    Args:\n        html (str): input html text.\n        width (int): wrap text to width columns. Default is 100.\n\n    \"\"\"\n```\nexample:\n```python\nimport html2text_rs\nimport requests\n\nresp = requests.get(\"https://en.wikipedia.org/wiki/AGM-88_HARM\")\n\ntext_markdown = html2text_rs.text_markdown(resp.text)\nprint(text_markdown)\n```\n### 2. text_plain()\n```python\ndef text_plain(html: str, width: int = 100):\n    \"\"\"Convert HTML to plain text.\n\n    Args:\n        html (str): input html text.\n        width (int): wrap text to width columns. Default is 100.\n\n    \"\"\"\n```\nexample:\n```python\nimport html2text_rs\nimport requests\n\nresp = requests.get(\"https://en.wikipedia.org/wiki/AGM-88_HARM\")\n\ntext_plain = html2text_rs.text_plain(resp.text)\nprint(text_plain)\n```\n### 3. text_rich()\n```python\ndef text_rich(html: str, width: int = 100):\n    \"\"\"Convert HTML to rich text.\n\n    Args:\n        html (str): input html text.\n        width (int): wrap text to width columns. Default is 100.\n\n    \"\"\"\n```\nexample:\n```python\nimport html2text_rs\nimport requests\n\nresp = requests.get(\"https://en.wikipedia.org/wiki/AGM-88_HARM\")\n\ntext_rich = html2text_rs.text_rich(resp.text)\nprint(text_rich)\n```\n\n",
+  "author": "deedy5",
+  "author_email": null,
+  "license": "MIT License",
+  "project_url": "https://pypi.org/project/html2text-rs/",
+  "homepage": null,
+  "requires_python": ">=3.8",
+  "dependencies": [
+    "pytest>=8.3.2;"
+  ],
+  "files": {
+    "python": [
+      "tests/test_html2text_rs.py",
+      "html2text_rs/__init__.py",
+      "html2text_rs/html2text_rs.pyi"
+    ],
+    "documentation": [
+      "README.md"
+    ],
+    "tests": [],
+    "configuration": [
+      "pyproject.toml"
+    ],
+    "data": [],
+    "other": [
+      "PKG-INFO",
+      "Cargo.toml",
+      "LICENSE",
+      "Cargo.lock",
+      ".gitignore",
+      "html2text_rs/py.typed",
+      "src/lib.rs"
+    ]
+  },
+  "metadata": {
+    "author": "deedy5",
+    "author_email": null,
+    "bugtrack_url": null,
+    "classifiers": [
+      "Programming Language :: Python :: Implementation :: CPython",
+      "Programming Language :: Python :: Implementation :: PyPy",
+      "Programming Language :: Rust",
+      "Topic :: Text Editors :: Text Processing",
+      "Topic :: Text Processing :: Markup :: HTML",
+      "Topic :: Text Processing :: Markup :: Markdown"
+    ],
+    "description": "![Python >= 3.8](https://img.shields.io/badge/python->=3.8-red.svg) [![](https://badgen.net/github/release/deedy5/html2text_rs)](https://github.com/deedy5/html2text_rs/releases) [![](https://badge.fury.io/py/html2text_rs.svg)](https://pypi.org/project/html2text_rs) [![Downloads](https://static.pepy.tech/badge/html2text_rs/week)](https://pepy.tech/project/html2text_rs) [![CI](https://github.com/deedy5/html2text_rs/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/deedy5/html2text_rs/actions/workflows/CI.yml)\n\n# html2text_rs\nConvert HTML to markdown or plain text.</br>\nPython binding to the rust [rust-html2text](https://github.com/jugglerchris/rust-html2text) library.\n\n## Table of Contents\n\n- [Installation](#installation)\n- [Usage](#usage)\n  - [text_markdown()](#1-text_markdown)\n  - [text_plain()](#2-text_plain)\n  - [text_rich()](#3-text_rich)\n\n## Installation\n\n```python\npip install -U html2text_rs\n```\n\n## Usage\n### 1. text_markdown()\n```python\ndef text_markdown(html: str, width: int = 100):\n    \"\"\"Convert HTML to markdown text.\n\n    Args:\n        html (str): input html text.\n        width (int): wrap text to width columns. Default is 100.\n\n    \"\"\"\n```\nexample:\n```python\nimport html2text_rs\nimport requests\n\nresp = requests.get(\"https://en.wikipedia.org/wiki/AGM-88_HARM\")\n\ntext_markdown = html2text_rs.text_markdown(resp.text)\nprint(text_markdown)\n```\n### 2. text_plain()\n```python\ndef text_plain(html: str, width: int = 100):\n    \"\"\"Convert HTML to plain text.\n\n    Args:\n        html (str): input html text.\n        width (int): wrap text to width columns. Default is 100.\n\n    \"\"\"\n```\nexample:\n```python\nimport html2text_rs\nimport requests\n\nresp = requests.get(\"https://en.wikipedia.org/wiki/AGM-88_HARM\")\n\ntext_plain = html2text_rs.text_plain(resp.text)\nprint(text_plain)\n```\n### 3. text_rich()\n```python\ndef text_rich(html: str, width: int = 100):\n    \"\"\"Convert HTML to rich text.\n\n    Args:\n        html (str): input html text.\n        width (int): wrap text to width columns. Default is 100.\n\n    \"\"\"\n```\nexample:\n```python\nimport html2text_rs\nimport requests\n\nresp = requests.get(\"https://en.wikipedia.org/wiki/AGM-88_HARM\")\n\ntext_rich = html2text_rs.text_rich(resp.text)\nprint(text_rich)\n```\n\n",
+    "description_content_type": "text/markdown; charset=UTF-8; variant=GFM",
+    "docs_url": null,
+    "download_url": null,
+    "downloads": {
+      "last_day": -1,
+      "last_month": -1,
+      "last_week": -1
+    },
+    "dynamic": null,
+    "home_page": null,
+    "keywords": "python, html2text, html-to-text, html-to-markdown, html2md, markdown",
+    "license": "MIT License",
+    "license_expression": null,
+    "license_files": null,
+    "maintainer": null,
+    "maintainer_email": null,
+    "name": "html2text-rs",
+    "package_url": "https://pypi.org/project/html2text-rs/",
+    "platform": null,
+    "project_url": "https://pypi.org/project/html2text-rs/",
+    "project_urls": null,
+    "provides_extra": null,
+    "release_url": "https://pypi.org/project/html2text-rs/0.2.2/",
+    "requires_dist": [
+      "pytest>=8.3.2; extra == \"dev\""
+    ],
+    "requires_python": ">=3.8",
+    "summary": "Convert HTML to markdown or plain text",
+    "version": "0.2.2",
+    "yanked": false,
+    "yanked_reason": null
+  }
+}

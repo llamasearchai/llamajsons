@@ -1,0 +1,884 @@
+=== bagbag v0.75.24 ===
+
+PACKAGE INFORMATION
+--------------------------------------------------------------------------------
+Name: bagbag
+Version: 0.75.24
+Summary: An all in one python library
+Author: Darren
+License: MIT
+Python requirement: >=3.9
+
+DEPENDENCIES
+--------------------------------------------------------------------------------
+- Faker
+- Flask
+- Js2Py
+- Levenshtein
+- OpenCC
+- Pillow
+- PyGithub
+- PyMySQL
+- Pygments
+- backpack
+- bcrypt
+- beautifulsoup4
+- blinker
+- cachetools
+- cleo
+- demjson3
+- feedparser
+- future
+- hachoir
+- hanzidentifier
+- html-to-json
+- html5lib
+- inflection
+- ipdb
+- ipwhois
+- jieba
+- kafka-python
+- langid
+- lazy-imports
+- lazy-object-proxy
+- listparser
+- loguru
+- lxml
+- lz4
+- markdown2
+- markdownify
+- matplotlib
+- mitmproxy
+- msgpack
+- nltk
+- nslookup
+- openai
+- opencv-python
+- openpyxl
+- packaging
+- paramiko
+- pendulum
+- pillow
+- prometheus-client
+- psutil
+- pyTelegramBotAPI
+- pyaml
+- pybase64
+- pycryptodome
+- pygtrans
+- pymongo
+- pypinyin
+- python-dateutil
+- python-magic
+- pythonping
+- pytz
+- pyyaml
+- random-user-agent
+- redis
+- requests
+- requests-toolbelt
+- schedule
+- scikit-learn
+- selenium
+- selenium-wire
+- service-identity
+- shortuuid
+- simplejson
+- six
+- telethon
+- tld
+- tldextract
+- tqdm
+- tronpy
+- tweepy
+- vaderSentiment
+- validators
+- vncdotool
+- wrapt
+
+FILE STRUCTURE
+--------------------------------------------------------------------------------
+
+SOURCE FILES (291)
+- bagbag/Base64/__init__.py
+- bagbag/Base64/src.py
+- bagbag/Cmd/__init__.py
+- bagbag/Cmd/src.py
+- bagbag/Cryptoo/__init__.py
+- bagbag/Cryptoo/src.py
+- bagbag/File/__init__.py
+- bagbag/File/src.py
+- bagbag/Funcs/ChromeExtension_src.py
+- bagbag/Funcs/CutSentenceStopWords_src.py
+- bagbag/Funcs/CutSentence_src.py
+- bagbag/Funcs/FakeIdentity_src.py
+- bagbag/Funcs/FileType_src.py
+- bagbag/Funcs/Format/__init__.py
+- bagbag/Funcs/Format/src.py
+- bagbag/Funcs/IP_src.py
+- bagbag/Funcs/MarkCoordinatesOnMap_src.py
+- bagbag/Funcs/Markdown_src.py
+- bagbag/Funcs/Ping_src.py
+- bagbag/Funcs/ResizeImage_src.py
+- bagbag/Funcs/UUID_src.py
+- bagbag/Funcs/VersionCompare_src.py
+- bagbag/Funcs/Wget_src.py
+- bagbag/Funcs/Whois_src.py
+- bagbag/Funcs/__init__.py
+- bagbag/Funcs/whois/__init__.py
+- bagbag/Funcs/whois/parser.py
+- bagbag/Funcs/whois/time_zones.py
+- bagbag/Funcs/whois/whois.py
+- bagbag/Hash/__init__.py
+- bagbag/Hash/src.py
+- bagbag/Http/__init__.py
+- bagbag/Http/src.py
+- bagbag/Json/__init__.py
+- bagbag/Json/src.py
+- bagbag/Lg.py
+- bagbag/Math/__init__.py
+- bagbag/Math/src.py
+- bagbag/Os/Path/__init__.py
+- bagbag/Os/Path/src.py
+- bagbag/Os/__init__.py
+- bagbag/Os/src.py
+- bagbag/Process/__init__.py
+- bagbag/Process/src.py
+- bagbag/Python/__init__.py
+- bagbag/Python/src.py
+- bagbag/Random/__init__.py
+- bagbag/Random/src.py
+- bagbag/Socket/TCP/__init__.py
+- bagbag/Socket/TCP/src.py
+- bagbag/Socket/UDP/__init__.py
+- bagbag/Socket/UDP/src.py
+- bagbag/Socket/__init__.py
+- bagbag/String/__init__.py
+- bagbag/String/src.py
+- bagbag/String/vars.py
+- bagbag/Thread/__init__.py
+- bagbag/Thread/src.py
+- bagbag/Time/__init__.py
+- bagbag/Time/src.py
+- bagbag/Tools/Argparser_src.py
+- bagbag/Tools/BlockChain/Binance/CoinsPrice_src.py
+- bagbag/Tools/BlockChain/Binance/OfficialAccountVertify/__init__.py
+- bagbag/Tools/BlockChain/Binance/OfficialAccountVertify/src.py
+- bagbag/Tools/BlockChain/Binance/__init__.py
+- bagbag/Tools/BlockChain/CoinMarketCap/__init__.py
+- bagbag/Tools/BlockChain/CoinMarketCap/api.py
+- bagbag/Tools/BlockChain/Ethereum/__init__.py
+- bagbag/Tools/BlockChain/Ethereum/ethereum.py
+- bagbag/Tools/BlockChain/OKLink/API_src.py
+- bagbag/Tools/BlockChain/OKLink/__init__.py
+- bagbag/Tools/BlockChain/Others/FearAndGreedIndex_src.py
+- bagbag/Tools/BlockChain/Others/__init__.py
+- bagbag/Tools/BlockChain/Tron/__init__.py
+- bagbag/Tools/BlockChain/Tron/src.py
+- bagbag/Tools/BlockChain/__init__.py
+- bagbag/Tools/CSV.py
+- bagbag/Tools/Cache.py
+- bagbag/Tools/Chan_src.py
+- bagbag/Tools/ComputerVision.py
+- bagbag/Tools/Crontab_src.py
+- bagbag/Tools/Database/__init__.py
+- bagbag/Tools/Database/orator/__init__.py
+- bagbag/Tools/Database/orator/commands/__init__.py
+- bagbag/Tools/Database/orator/commands/application.py
+- bagbag/Tools/Database/orator/commands/command.py
+- bagbag/Tools/Database/orator/commands/migrations/__init__.py
+- bagbag/Tools/Database/orator/commands/migrations/base_command.py
+- bagbag/Tools/Database/orator/commands/migrations/install_command.py
+- bagbag/Tools/Database/orator/commands/migrations/make_command.py
+- bagbag/Tools/Database/orator/commands/migrations/migrate_command.py
+- bagbag/Tools/Database/orator/commands/migrations/refresh_command.py
+- bagbag/Tools/Database/orator/commands/migrations/reset_command.py
+- bagbag/Tools/Database/orator/commands/migrations/rollback_command.py
+- bagbag/Tools/Database/orator/commands/migrations/status_command.py
+- bagbag/Tools/Database/orator/commands/models/__init__.py
+- bagbag/Tools/Database/orator/commands/models/make_command.py
+- bagbag/Tools/Database/orator/commands/models/stubs.py
+- bagbag/Tools/Database/orator/commands/seeds/__init__.py
+- bagbag/Tools/Database/orator/commands/seeds/base_command.py
+- bagbag/Tools/Database/orator/commands/seeds/make_command.py
+- bagbag/Tools/Database/orator/commands/seeds/seed_command.py
+- bagbag/Tools/Database/orator/connections/__init__.py
+- bagbag/Tools/Database/orator/connections/connection.py
+- bagbag/Tools/Database/orator/connections/connection_interface.py
+- bagbag/Tools/Database/orator/connections/connection_resolver_interface.py
+- bagbag/Tools/Database/orator/connections/mysql_connection.py
+- bagbag/Tools/Database/orator/connections/postgres_connection.py
+- bagbag/Tools/Database/orator/connections/sqlite_connection.py
+- bagbag/Tools/Database/orator/connectors/__init__.py
+- bagbag/Tools/Database/orator/connectors/connection_factory.py
+- bagbag/Tools/Database/orator/connectors/connector.py
+- bagbag/Tools/Database/orator/connectors/mysql_connector.py
+- bagbag/Tools/Database/orator/connectors/postgres_connector.py
+- bagbag/Tools/Database/orator/connectors/sqlite_connector.py
+- bagbag/Tools/Database/orator/database_manager.py
+- bagbag/Tools/Database/orator/dbal/__init__.py
+- bagbag/Tools/Database/orator/dbal/abstract_asset.py
+- bagbag/Tools/Database/orator/dbal/column.py
+- bagbag/Tools/Database/orator/dbal/column_diff.py
+- bagbag/Tools/Database/orator/dbal/comparator.py
+- bagbag/Tools/Database/orator/dbal/exceptions/__init__.py
+- bagbag/Tools/Database/orator/dbal/foreign_key_constraint.py
+- bagbag/Tools/Database/orator/dbal/identifier.py
+- bagbag/Tools/Database/orator/dbal/index.py
+- bagbag/Tools/Database/orator/dbal/mysql_schema_manager.py
+- bagbag/Tools/Database/orator/dbal/platforms/__init__.py
+- bagbag/Tools/Database/orator/dbal/platforms/keywords/__init__.py
+- bagbag/Tools/Database/orator/dbal/platforms/keywords/keyword_list.py
+- bagbag/Tools/Database/orator/dbal/platforms/keywords/mysql_keywords.py
+- bagbag/Tools/Database/orator/dbal/platforms/keywords/postgresql_keywords.py
+- bagbag/Tools/Database/orator/dbal/platforms/keywords/sqlite_keywords.py
+- bagbag/Tools/Database/orator/dbal/platforms/mysql57_platform.py
+- bagbag/Tools/Database/orator/dbal/platforms/mysql_platform.py
+- bagbag/Tools/Database/orator/dbal/platforms/platform.py
+- bagbag/Tools/Database/orator/dbal/platforms/postgres_platform.py
+- bagbag/Tools/Database/orator/dbal/platforms/sqlite_platform.py
+- bagbag/Tools/Database/orator/dbal/postgres_schema_manager.py
+- bagbag/Tools/Database/orator/dbal/schema_manager.py
+- bagbag/Tools/Database/orator/dbal/sqlite_schema_manager.py
+- bagbag/Tools/Database/orator/dbal/table.py
+- bagbag/Tools/Database/orator/dbal/table_diff.py
+- bagbag/Tools/Database/orator/dbal/types/__init__.py
+- bagbag/Tools/Database/orator/events/__init__.py
+- bagbag/Tools/Database/orator/exceptions/__init__.py
+- bagbag/Tools/Database/orator/exceptions/connection.py
+- bagbag/Tools/Database/orator/exceptions/connectors.py
+- bagbag/Tools/Database/orator/exceptions/orm.py
+- bagbag/Tools/Database/orator/exceptions/query.py
+- bagbag/Tools/Database/orator/migrations/__init__.py
+- bagbag/Tools/Database/orator/migrations/database_migration_repository.py
+- bagbag/Tools/Database/orator/migrations/migration.py
+- bagbag/Tools/Database/orator/migrations/migration_creator.py
+- bagbag/Tools/Database/orator/migrations/migrator.py
+- bagbag/Tools/Database/orator/migrations/stubs.py
+- bagbag/Tools/Database/orator/orm/__init__.py
+- bagbag/Tools/Database/orator/orm/builder.py
+- bagbag/Tools/Database/orator/orm/collection.py
+- bagbag/Tools/Database/orator/orm/factory.py
+- bagbag/Tools/Database/orator/orm/factory_builder.py
+- bagbag/Tools/Database/orator/orm/mixins/__init__.py
+- bagbag/Tools/Database/orator/orm/mixins/soft_deletes.py
+- bagbag/Tools/Database/orator/orm/model.py
+- bagbag/Tools/Database/orator/orm/relations/__init__.py
+- bagbag/Tools/Database/orator/orm/relations/belongs_to.py
+- bagbag/Tools/Database/orator/orm/relations/belongs_to_many.py
+- bagbag/Tools/Database/orator/orm/relations/has_many.py
+- bagbag/Tools/Database/orator/orm/relations/has_many_through.py
+- bagbag/Tools/Database/orator/orm/relations/has_one.py
+- bagbag/Tools/Database/orator/orm/relations/has_one_or_many.py
+- bagbag/Tools/Database/orator/orm/relations/morph_many.py
+- bagbag/Tools/Database/orator/orm/relations/morph_one.py
+- bagbag/Tools/Database/orator/orm/relations/morph_one_or_many.py
+- bagbag/Tools/Database/orator/orm/relations/morph_pivot.py
+- bagbag/Tools/Database/orator/orm/relations/morph_to.py
+- bagbag/Tools/Database/orator/orm/relations/morph_to_many.py
+- bagbag/Tools/Database/orator/orm/relations/pivot.py
+- bagbag/Tools/Database/orator/orm/relations/relation.py
+- bagbag/Tools/Database/orator/orm/relations/result.py
+- bagbag/Tools/Database/orator/orm/relations/wrapper.py
+- bagbag/Tools/Database/orator/orm/scopes/__init__.py
+- bagbag/Tools/Database/orator/orm/scopes/scope.py
+- bagbag/Tools/Database/orator/orm/scopes/soft_deleting.py
+- bagbag/Tools/Database/orator/orm/utils.py
+- bagbag/Tools/Database/orator/pagination/__init__.py
+- bagbag/Tools/Database/orator/pagination/base.py
+- bagbag/Tools/Database/orator/pagination/length_aware_paginator.py
+- bagbag/Tools/Database/orator/pagination/paginator.py
+- bagbag/Tools/Database/orator/query/__init__.py
+- bagbag/Tools/Database/orator/query/builder.py
+- bagbag/Tools/Database/orator/query/expression.py
+- bagbag/Tools/Database/orator/query/grammars/__init__.py
+- bagbag/Tools/Database/orator/query/grammars/grammar.py
+- bagbag/Tools/Database/orator/query/grammars/mysql_grammar.py
+- bagbag/Tools/Database/orator/query/grammars/postgres_grammar.py
+- bagbag/Tools/Database/orator/query/grammars/sqlite_grammar.py
+- bagbag/Tools/Database/orator/query/join_clause.py
+- bagbag/Tools/Database/orator/query/processors/__init__.py
+- bagbag/Tools/Database/orator/query/processors/mysql_processor.py
+- bagbag/Tools/Database/orator/query/processors/postgres_processor.py
+- bagbag/Tools/Database/orator/query/processors/processor.py
+- bagbag/Tools/Database/orator/query/processors/sqlite_processor.py
+- bagbag/Tools/Database/orator/schema/__init__.py
+- bagbag/Tools/Database/orator/schema/blueprint.py
+- bagbag/Tools/Database/orator/schema/builder.py
+- bagbag/Tools/Database/orator/schema/grammars/__init__.py
+- bagbag/Tools/Database/orator/schema/grammars/grammar.py
+- bagbag/Tools/Database/orator/schema/grammars/mysql_grammar.py
+- bagbag/Tools/Database/orator/schema/grammars/postgres_grammar.py
+- bagbag/Tools/Database/orator/schema/grammars/sqlite_grammar.py
+- bagbag/Tools/Database/orator/schema/mysql_builder.py
+- bagbag/Tools/Database/orator/schema/schema.py
+- bagbag/Tools/Database/orator/seeds/__init__.py
+- bagbag/Tools/Database/orator/seeds/seeder.py
+- bagbag/Tools/Database/orator/seeds/stubs.py
+- bagbag/Tools/Database/orator/support/__init__.py
+- bagbag/Tools/Database/orator/support/collection.py
+- bagbag/Tools/Database/orator/support/fluent.py
+- bagbag/Tools/Database/orator/support/grammar.py
+- bagbag/Tools/Database/orator/utils/__init__.py
+- bagbag/Tools/Database/orator/utils/command_formatter.py
+- bagbag/Tools/Database/orator/utils/helpers.py
+- bagbag/Tools/Database/orator/utils/qmarker.py
+- bagbag/Tools/Database/orator/utils/url.py
+- bagbag/Tools/Database/src.py
+- bagbag/Tools/DistributedLock_src.py
+- bagbag/Tools/Draw.py
+- bagbag/Tools/Elasticsearch_src.py
+- bagbag/Tools/FlashPoint_src.py
+- bagbag/Tools/Github_src.py
+- bagbag/Tools/JavaScript_src.py
+- bagbag/Tools/Kafka_src.py
+- bagbag/Tools/Lock_src.py
+- bagbag/Tools/MatrixBot_src.py
+- bagbag/Tools/Mitmproxy_src.py
+- bagbag/Tools/Mongodb_src.py
+- bagbag/Tools/Nmap/__init__.py
+- bagbag/Tools/Nmap/service_probes.py
+- bagbag/Tools/Nmap/service_probes_parser.py
+- bagbag/Tools/Nslookup_src.py
+- bagbag/Tools/OCR_src.py
+- bagbag/Tools/OpenAI.py
+- bagbag/Tools/ProgressBar_src.py
+- bagbag/Tools/Prometheus/MetricServer.py
+- bagbag/Tools/Prometheus/PushGateway.py
+- bagbag/Tools/Prometheus/Utils.py
+- bagbag/Tools/Prometheus/__init__.py
+- bagbag/Tools/Prometheus/metrics.py
+- bagbag/Tools/Queue_src.py
+- bagbag/Tools/RSS/Feed_src.py
+- bagbag/Tools/RSS/Opml_src.py
+- bagbag/Tools/RSS/__init__.py
+- bagbag/Tools/Ratelimit_src.py
+- bagbag/Tools/Redis_src.py
+- bagbag/Tools/SMTP_src.py
+- bagbag/Tools/SSH_src.py
+- bagbag/Tools/Selenium.py
+- bagbag/Tools/TelegramAsync.py
+- bagbag/Tools/TelegramBotOfficial_src.py
+- bagbag/Tools/TelegramBot_src.py
+- bagbag/Tools/Telegram_src.py
+- bagbag/Tools/TextClassifier/Bayes.py
+- bagbag/Tools/TextClassifier/LogisticRegression.py
+- bagbag/Tools/TextClassifier/SVM.py
+- bagbag/Tools/TextClassifier/__init__.py
+- bagbag/Tools/TextClassifier/base.py
+- bagbag/Tools/TextClassifier/vars.py
+- bagbag/Tools/Translater.py
+- bagbag/Tools/Twitter/Browser_src.py
+- bagbag/Tools/Twitter/Elevated_src.py
+- bagbag/Tools/Twitter/Essential_src.py
+- bagbag/Tools/Twitter/Nitter_src.py
+- bagbag/Tools/Twitter/Utils.py
+- bagbag/Tools/Twitter/__init__.py
+- bagbag/Tools/URL_src.py
+- bagbag/Tools/VNC_src.py
+- bagbag/Tools/WaitGroup_src.py
+- bagbag/Tools/WebCrawler_src.py
+- bagbag/Tools/WebServer_src.py
+- bagbag/Tools/XPath_src.py
+- bagbag/Tools/Xlsx.py
+- bagbag/Tools/ZIP_src.py
+- bagbag/Tools/__init__.py
+- bagbag/Tools/pygtrans/ApiKeyTranslate.py
+- bagbag/Tools/pygtrans/DetectResponse.py
+- bagbag/Tools/pygtrans/LanguageResponse.py
+- bagbag/Tools/pygtrans/Null.py
+- bagbag/Tools/pygtrans/Translate.py
+- bagbag/Tools/pygtrans/TranslateResponse.py
+- bagbag/Tools/pygtrans/__init__.py
+- bagbag/__init__.py
+
+CONFIG FILES (1)
+- bagbag/Tools/Twitter/user.json
+
+DATA FILES (4)
+- bagbag/Funcs/whois/data/public_suffix_list.dat
+- bagbag/String/stopwords.txt
+- bagbag/String/tlds.txt
+- bagbag/Tools/test.csv
+
+OTHER FILES (27)
+- bagbag-0.75.24.dist-info/LICENSE
+- bagbag-0.75.24.dist-info/METADATA
+- bagbag-0.75.24.dist-info/RECORD
+- bagbag-0.75.24.dist-info/WHEEL
+- bagbag/Tools/Nmap/nmap-service-probes
+- bagbag/Tools/Telegram.ident
+- bagbag/Tools/TelegramBot.ident
+- bagbag/Tools/Twitter/search.retweet.html
+- bagbag/Tools/Twitter/tweet.detail.1.html
+- bagbag/Tools/Twitter/tweet.detail.html
+- bagbag/Tools/Twitter/tweet.detail.single.html
+- bagbag/Tools/Twitter/tweet.html
+- bagbag/Tools/Twitter/tweet.url.in.text.html
+- bagbag/Tools/Twitter/twitter.ident
+- bagbag/Tools/Twitter/user.1.html
+- bagbag/Tools/Twitter/user.2.html
+- bagbag/Tools/Twitter/user.3.html
+- bagbag/Tools/Twitter/user.4.verified.html
+- bagbag/Tools/Twitter/user.html
+- bagbag/Tools/baidu.ident
+- bagbag/Tools/geckodriver.log
+- bagbag/Tools/photo_2022-03-01_07-07-36.jpg
+- bagbag/Tools/telegram-session.session
+- bagbag/Tools/test.xlsx
+- bagbag/Tools/test1.xlsx
+- bagbag/Tools/video.mp4
+- package.zip
+
+DESCRIPTION
+--------------------------------------------------------------------------------
+bagbag
+
+An all in one python library
+
+Install
+
+```bash
+pip3 install bagbag --upgrade
+```
+
+Docker
+
+```bash
+docker run --rm --name bagbag -v /path/to/file/run.py:/app/run.py darren2046/bagbag:latest
+docker run --rm --name bagbag -v /path/to/file/run.py:/app/run.py darren2046/bagbag-gui:latest xvfb running so can use gui application such as chromedriver with selenium
+docker run --rm --name bagbag -v /path/to/file/run.py:/app/run.py darren2046/bagbag-gui-debug:latest HTTP Server serving vnc desktop runing on port 80
+```
+
+Library
+
+* Crypto
+
+  * AES(key:str, mode:str="cfb")
+    * Encrypt(raw:str) -> str
+    * Decrypt(enc:str) -> str
+* File(path:str)
+
+  * Write(data:str)
+  * Append(data:str)
+* Lg 日志模块
+
+  * Lg.SetLevel(level:日志级别:str)
+  * Lg.SetFile(path:日志路径:str, size:文件大小，MB:int, during:日志保留时间，天:int, color:是否带ANSI颜色:bool=True, json:是否格式化为json:bool=False)
+  * Lg.Debug(message:str)
+  * Lg.Trace(message:str)
+  * Lg.Info(message:str)
+  * Lg.Warn(message:str)
+  * Lg.Error(message:str)
+* String(string:str) 一些字符串处理函数
+
+  * HasChinese() -> bool 是否包含中文
+  * Language() -> str 语言
+  * Repr() -> str
+  * SimplifiedChineseToTraditional() -> str
+  * TraditionalChineseToSimplified() -> str
+  * Ommit(length:int) -> str
+  * Filter(chars:str="1234567890qwertyuioplkjhgfdsazxcvbnmQWERTYUIOPLKJHGFDSAZXCVBNM") -> str
+  * Len() -> int
+  * IsIPAddress() -> bool
+* Time 时间
+
+  * Strftime(timestamp:float|int, format:str="%Y-%m-%d %H:%M:%S") -> str
+  * Strptime(timestring:str, format:str=None) -> int
+* Base64
+
+  * Encode(s:str|bytes) -> str
+  * Decode(s:str) -> str|bytes
+* Json
+
+  * Dumps(obj, indent=4, ensure_ascii=False) -> str
+  * Loads(s:str) -> list | dict
+  * ExtraValueByKey(obj:list|dict, key:str) -> list
+* Hash
+
+  * Md5sum(string:str) -> str
+   Md5sumFile(fpath:str, block_size=2*20) -> str
+  * Sha256sum(data:str|bytes) -> str
+   Sha256sumFile(fpath:str, block_size=2*20) -> str
+* Os
+
+  * Exit(num:int=0)
+  * Mkdir(path:str)
+  * Getenv(varname:str, defaultValue:str=None) -> str | None
+  * ListDir(path:str) -> list[str]
+  * Unlink(path:str)
+  * Move(src:str, dst:str, force:bool=True)
+  * Copy(src:str, dst:str, force:bool=True)
+  * Path
+    * Basedir(path:str) -> str
+     Join(path) -> str
+    * Exists(path:str) -> bool
+    * Uniquify(path:str) -> str
+    * IsDir(path:str) -> bool
+    * Basename(path:str) -> str
+* Http
+
+  * Head(url:str, Timeout:str=None, ReadBodySize:int=None, FollowRedirect:bool=True, HttpProxy:str=None, TimeoutRetryTimes:int=0, InsecureSkipVerify:int=False,Debug:bool=False)
+  * Get(url:str, Timeout:str=None, ReadBodySize:int=None, FollowRedirect:bool=True, HttpProxy:str=None,  TimeoutRetryTimes:int=0, InsecureSkipVerify:int=False,Debug:bool=False)
+  * PostRaw(url:str, Data:str, Timeout:str=None, ReadBodySize:int=None, FollowRedirect:bool=True, HttpProxy:str=None, TimeoutRetryTimes:int=0, InsecureSkipVerify:int=False,Debug:bool=False)
+  * PostJson(url:str, Json:dict,Timeout:str=None, ReadBodySize:int=None, FollowRedirect:bool=True, HttpProxy:str=None, TimeoutRetryTimes:int=0, InsecureSkipVerify:int=False,Debug:bool=False)
+  * PostForm(url:str, Data:dict, Timeout:str=None, ReadBodySize:int=None, FollowRedirect:bool=True, HttpProxy:str=None, TimeoutRetryTimes:int=0, InsecureSkipVerify:int=False,Debug:bool=False)
+  * Delete(url:str, Timeout:str=None, ReadBodySize:int=None, FollowRedirect:bool=True, HttpProxy:str=None, TimeoutRetryTimes:int=0, InsecureSkipVerify:int=False,Debug:bool=False)
+  * PutForm(url:str, Data:dict,Timeout:str=None, ReadBodySize:int=None, FollowRedirect:bool=True, HttpProxy:str=None, TimeoutRetryTimes:int=0, InsecureSkipVerify:int=False,Debug:bool=False)
+  * PutRaw(url:str, Data:str, Timeout:str=None, ReadBodySize:int=None, FollowRedirect:bool=True, HttpProxy:str=None, TimeoutRetryTimes:int=0, InsecureSkipVerify:int=False, Debug:bool=False)
+  * PutJson(url:str, Json:dict, Timeout:str=None, ReadBodySize:int=None, FollowRedirect:bool=True, HttpProxy:str=None, TimeoutRetryTimes:int=0, InsecureSkipVerify:int=False,Debug:bool=False)
+* Socket
+
+  * TCP
+    * Listen(host:str, port:int, waitQueue:int=5)
+      * Accept() -> Chan[StreamConnection]
+      * AcceptOne() -> StreamConnection
+    * Connect(host:str, port:int) -> StreamConnection
+      * PeerAddress() -> TCPPeerAddress
+      * Send(data:str)
+      * SendBytes(data:bytes)
+      * Recv(length:int) -> str
+      * RecvBytes(length:int) -> bytes
+      * Close()
+* Random
+
+  * Int(min:int, max:int) -> int
+  * Choice(obj:list|str) -> Any
+  * String(length:int, charset:str="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789") -> str
+  * Shuffle(li:list) -> list
+* Funcs
+
+  * Markdown2Html(text:str) -> str
+  * Wget(url:str, dest:str=None, override=True)
+  * IP2Int(ip:str) -> int
+  * Int2IP(intip:int) -> str
+  * ResizeImage(src:str, dst:str, width:int, quality:int=95)
+  * UUID() -> str
+  * CutSentence(sentence:str, filter:bool=True) -> list[str]
+* Tools 一些工具
+
+  * Cache
+
+    * LRU(size:int) -> dict
+    * FIFO(size:int) -> dict
+    * LFU(size:int) -> dict
+    * MRU(size:int) -> dict
+    * RR(size:int) -> dict
+    * TTL(size:int) -> dict
+  * OCR(server:str)
+
+    * Recognition(fpath:str, lang:str="ch") -> ocrResult
+      * SaveImage(fpath:str)
+  * WebCrawler()
+
+    * Run(self, url:str) -> typing.Iterable[WebCrawlerResult]
+  * JavaScript
+
+    * Eval(code:str)
+  * BlockChain
+
+    * Tron
+      * TronClient(fullNodeServer:str)
+        * Block(blockNumber:int) -> tronBlock
+          * Transcations() -> list[tronTranscation]
+      * TronContract(address:str)
+        * Info()
+        * Address()
+      * TronAsset(name:str)
+        * Info()
+        * Name()
+    * Binance
+      * OfficalAccountVertify
+        * Twitter(account:str, waiteOnRateLimit:bool=True) -> bool
+      * GetPrice(pair:str|list=None) -> CoinsPairPrice | list[CoinsPairPrice]
+  * Twitter
+
+    * Essential(bearerToken:str)
+      * Search(keyword:str, sinceID:int=None, tweetPerRequest:int=10) -> typing.Iterable[twitterTweet]
+      * Timeline(screename:str, sinceID:int=None, tweetPerRequest:int=10) -> typing.Iterable[twitterTweet]
+    * Elevated(consumer_key:str, consumer_secret:str)
+      * Search(keyword:str, days:int=7) -> typing.Iterable[twitterTweet]
+      * Timeline(screename:str) -> typing.Iterable[twitterTweet]
+      * Followers(screename:str) -> typing.Iterable[twitterUser]
+  * Nslookup(server:list[str]=["8.8.8.8", "1.1.1.1", "8.8.4.4"], tcp:bool=False)
+
+    * A(domain:str) -> list[str]
+    * AAAA(domain:str) -> list[str]
+  * MatrixBot(apiserver:str, password:str="")
+
+    * SetRoom(room:str) -> MatrixBot
+    * Send(message:str)
+    * SendImage(path:str)
+    * GetMessage(num:int=10) -> list[MatrixBotMessage]
+      * Reply(message:str)
+      * ReplyImage(path:str)
+  * RSS
+
+    * Opml(opmlurl:str) -> list[RSSFeed]
+    * Feed(feedurl:str) -> list[RSSPage]
+  * Queue(server:str, name:str, length:int=0, timeout:int=300)
+
+    * QueueConfirm(name:str, length:int=0, timeout:int=300) -> queueQueueConfirm
+      * Put(item:typing.Any, force:bool=False)
+      * Get(self) -> typing.Tuple[str, typing.Any]
+      * Done(tid:str)
+      * Size(self) -> int
+  * Kafka(topic:str, servers:str|list)
+
+    * Producer(value_serializer=lambda m: json.dumps(m).encode()) -> KafkaProducer
+      * Send(data:dict)
+    * Consumer(group_id:str=None, auto_offset_reset:str='earliest') -> KafkaConsumer
+      * Get() -> dict
+  * Github(token:str, ratelimit:str="30/m")
+
+    * Search(pattern:str) -> GithubSearchResults
+      * Get() -> GithubSearchResult | None
+  * SSH(host:str, port:int=None, user:str=None, password:str=None, pkey:str=None)
+
+    * GetOutput(command:str) -> str
+    * Close()
+    * Upload(localpath:str, remotepath:str=None)
+    * Download(remotepath:str, localpath:str=None)
+    * FileInfo(filepath:str)
+    * ListDir(dirpath:str=".") -> dict
+  * Translater
+
+    * Baidu(appid:str, secretkey:str)
+      * SetLang(To:str="zh", From:str="auto") -> Baidu
+      * Translate(text:str) -> dict
+    * Google(httpProxy:str=None)
+      * SetLang(To:str="zh-CN", From:str="auto") -> Google
+      * Translate(text:str, format:str="html") -> str
+  * XPath(html:str)
+
+    * Find(xpath:str) -> XPath | None
+    * Attribute(name:str) -> str | None
+    * Text() -> str
+    * Html() -> str
+  * WaitGroup()
+
+    * Add()
+    * Done()
+    * Wait()
+  * Crontab()
+
+    * Every(interval: int = 1) -> Crontab
+    * Second() -> Crontab
+    * Minute() -> Crontab
+    * Hour() -> Crontab
+    * Day() -> Crontab
+    * Week() -> Crontab
+    * At(time: str) -> Crontab
+     Do(job_func, args, kwargs)
+    * Monday()
+    * Tuesday()
+    * Wednesday()
+    * Thursday()
+    * Friday()
+    * Saturday()
+    * Sunday()
+  * Elasticsearch(url:str)
+
+    * Delete(IndexName:str)
+    * Collection(IndexName:str)
+      * Index(id:int, data:dict, refresh:bool=False, Timeout:int=15)
+      * Refresh(Timeout:int=15)
+      * Delete(id:int)
+      * Search(key:str, value:str, page:int=1, pagesize:int=50, OrderByKey:str=None, OrderByOrder:str="ase", Highlight:str=None, mustIncludeAllWords:bool=True)
+  * CSV
+
+    * Reader(fpath:str)
+      * Read() -> dict
+      * Close()
+    * Writer(fpath:str, mode:str="w")
+       SetHeaders(headers)
+      * Write(row:dict[str])
+      * Close()
+      * Flush()
+  * Xlsx
+
+    * Reader(fpath:str)
+      * Read() -> dict
+      * Close()
+    * Writer(fpath:str, mode:str="w")
+       SetHeaders(headers)
+      * Write(row:dict[str])
+      * Close()
+      * Flush()
+  * WebServer(name:str=None) 例子见源码文件Web.py的后半部分
+
+    * Run(host:str, port:int, block:bool=True) 监听HTTP服务
+    * Route: (path:str, methods:list=["GET", "HEAD", "OPTIONS"]) 例子见Web.py文件, 是一个装饰器
+    * Request()
+      * Method() -> str 请求的HTTP方法
+      * Json() -> dict | list 格式化请求的post内容为json
+      * Data() -> str post的http的body
+      * Form()
+        * Get(name:str, default:str="") -> str | None 获取表单的数据
+      * Args()
+        * Get(name:str, default:str="") -> str | None 获取URL的参数
+  * Chan() 内存队列, 跟go的chan一样
+  * RateLimit(rate:str, sleep:bool=True) rate可以是 次数/时间区间, 时间可以是s, m, h, d, 即秒,分,时,天. 例如一分钟限制五次: 5/m. 在低速率的时候能限制准确, 例如低于1秒10次. 高速率例如每秒50次以上, 实际速率会降低, 速率越高降低越多.
+
+    * Take() sleep=True的时候会添加一个sleep, 可以把请求平均在时间段内. 在低速率的时候能限制准确. 高速率例如每秒50次以上, 实际速率会降低, 速率越高降低越多. sleep=False的时候没有sleep, 会全在一开始扔出去, 然后block住, 等下一个周期, 在需要速率很高的时候可以这样, 例如发包的时候, 一秒限制2000个包这样.
+  * URL(url:str)
+
+    * Parse() -> URLParseResult
+    * Encode() -> str
+    * Decode() -> str
+  * Prometheus
+
+    * MetricServer(listen:str="0.0.0.0", port:int=9105)
+    * PushGateway(address:str, job:str, pushinterval:int=15, instance:str=None)
+      * NewCounter(name:str, help:str) -> prometheusCounter
+        * Add(num:int|float=1)
+      * NewCounterWithLabel(name:str, labels:list[str], help:str) -> prometheusCounterVec
+        * Add(labels:dict|list, num:int|float=1)
+      * NewGauge(name:str, help:str) -> prometheusGauge
+        * Set(num:int|float)
+      * NewGaugeWithLabel(name:str, labels:list[str], help:str) -> prometheusGaugeVec
+        * Set(labels:dict|list, num:int|float=1)
+  * Selenium
+
+    * Firefox(seleniumServer:str=None, PACFileURL:str=None, sessionID:str=None)
+    * Chrome(seleniumServer:str=None, httpProxy:str=None, sessionID=None)
+       Except(xpath:str, timeout:int=30) -> int | None
+      * ResizeWindow(width:int, height:int)
+      * ScrollRight(pixel:int)
+      * ScrollLeft(pixel:int)
+      * ScrollUp(pixel:int)
+      * ScrollDown(pixel:int)
+      * Url() -> str
+      * Cookie() -> list[dict]
+      * SetCookie(cookie_dict:dict)
+      * Refresh()
+      * GetSession() -> str
+      * Get(url:str)
+      * PageSource() -> str
+      * Title() -> str
+      * Close()
+      * SwitchTabByID(number:int)
+      * SwitchTabByIdent(ident:str)
+      * Tabs() -> list[str]
+      * NewTab() -> str
+      * Find(xpath:str, timeout:int=60, scrollIntoElement:bool=True) -> SeleniumElement
+        * Clear() -> SeleniumElement
+        * Click() -> SeleniumElement
+        * Text() -> str
+        * Attribute(name:str) -> str
+        * Input(string:str) -> SeleniumElement
+        * Submit() -> SeleniumElement
+        * PressEnter() -> SeleniumElement
+        * ScrollIntoElement() -> SeleniumElement
+  * Telegram(appid:str, apphash:str, sessionString:str=None)
+
+    * SessionString() -> str
+    * ResolvePeerByUsername(username:str) -> TelegramPeer | None
+    * PeerByIDAndHash(ID:int, Hash:int, Type:str="channel") -> TelegramPeer | None
+      * Resolve() 如果手动根据ID初始化一个TelegramPeer实例, 调用这个函数可以补全这个ID对应的Peer的信息
+      * SendMessage(message:str)
+      * Messages(limit:int=100, offset:int=0) -> list[TelegramMessage]
+      * Message(id:str) -> TelegramMessage
+        * Refresh() -> TelegramMessage 有时候同一个id, 被编辑了, 刷新一下返回最新的消息
+        * ClickButton(buttonText:str) -> bool
+        * Delete()
+  * TelegramBotOfficial(token:str)
+
+    * GetMe() -> telebot.types.User
+    * SetChatID(chatid:int) -> TelegramBot
+     SetTags(tags:str) -> TelegramBot
+    * SendFile(path:str)
+    * SendImage(path:str)
+    * SendVideo(path:str)
+    * SendAudio(path:str)
+    * SendLocation(latitude:float, longitude:float)
+     SendMsg(msg:str, tags:str)
+  * ProgressBar(iterable_obj, total=None, title=None, leave=False)
+  * Redis(host: str, port: int = 6379, database: int = 0, password: str = "")
+
+    * Set(key:str, value:str, ttl:int=None) -> (bool | None)
+    * Get(key:str) -> (str | None)
+    * Del(key:str) -> int
+    * Lock(key:str) -> RedisLock
+      * Acquire()
+      * Release()
+    * Queue(key:str) -> RedisQueue
+      * Size() -> int
+      * Put(item:str)
+      * Get(block=True, timeout=None) -> str
+  * MySQL(host: str, port: int, user: str, password: str, database: str, prefix:str = "") 跟5.7兼容. 因为orator跟5.7兼容, 跟8.0会有小问题, 作者很久不更新, 有空换掉这个orm. 注意, Python的MySQL操作不支持多线程, 需要每个线程连接一次MySQL, 不过这个是自动的, 在Get, Update等操作的时候如果链接异常就重连
+  * SQLite(path: str, prefix:str = "") 由于SQLite每次只能一个线程进行操作, 所以这里默认会有一个锁, 线程安全
+
+    * Queue(tbname:str, size:int=None) -> NamedQueue
+      * Size() -> int
+      * Get(wait=True) -> Any
+      * Put(string:Any)
+    * QueueConfirm(tbname:str, size:int=None, timeout:int=900) -> NamedConfirmQueue
+      * Size() -> int
+      * SizeStarted() -> int
+      * SizeTotal() -> int
+      * Get(wait=True) -> typing.Tuple[int, typing.Any]
+      * Put(item:typing.Any)
+      * Done(id:int)
+    * Execute(sql: str) -> (bool | int | list)
+    * Tables() -> list
+    * Table(tbname: str) -> MySQLSQLiteTable
+      * AddColumn(colname: str, coltype: str, default=None, nullable:bool = True) -> MySQLSQLiteTable
+       AddIndex(cols: str) -> MySQLSQLiteTable
+       Fields(cols: str) -> MySQLSQLiteTable
+      * Where(key:str, opera:str, value:str) -> MySQLSQLiteTable
+      * WhereIn(key:str, value: list) -> MySQLSQLiteTable
+      * WhereNotIn(key:str, value: list) -> MySQLSQLiteTable
+      * WhereNull(key:str) -> MySQLSQLiteTable
+      * WhereNotNull(key:str) -> MySQLSQLiteTable
+      * WhereBetween(key:str, start:int|float|str, end:int|float|str) -> MySQLSQLiteTable
+      * WhereNotBetween(key:str, start:int|float|str, end:int|float|str) -> MySQLSQLiteTable
+      * OrWhere(key:str, opera:str, value:str) -> MySQLSQLiteTable
+      * OrWhereIn(key:str, value: list) -> MySQLSQLiteTable
+       OrderBy(key:str) -> MySQLSQLiteTable
+      * Limit(num:int) -> MySQLSQLiteTable
+      * Paginate(size:int, page:int) -> MySQLSQLiteTable
+      * Data(value:map) -> MySQLSQLiteTable
+      * Offset(num:int) -> MySQLSQLiteTable
+      * Insert()
+      * Update()
+      * Delete()
+      * InsertGetID() -> int
+      * Exists() -> bool
+      * Count() -> int
+      * Find(id:int) -> map
+      * First() -> map
+      * Get() -> list
+      * Columns() -> list[map]
+    * KeyValue(tbname:str)
+      * Get(key:str) -> Any
+      * Set(key:str, value:Any)
+      * Del(key:str)
+      * Keys() -> list[str]
+
+其它的
+
+ Thread(func, args:Any, daemon:bool=True) -> threading.Thread 启动线程, daemon=True
+ Process(func, args:Any, daemon:bool=True) -> multiprocessing.Process 启动进程, daemon=True
+
+
+
+ADDITIONAL METADATA
+--------------------------------------------------------------------------------
+author: Darren
+classifiers: ['License :: OSI Approved :: MIT License', 'Programming Language :: Python :: 3', 'Programming Language :: Python :: 3.10', 'Programming Language :: Python :: 3.11', 'Programming Language :: Python :: 3.12', 'Programming Language :: Python :: 3.13', 'Programming Language :: Python :: 3.9']
+description_content_type: text/markdown
+downloads: {'last_day': -1, 'last_month': -1, 'last_week': -1}
+keywords: base, library
+license: MIT
+name: bagbag
+package_url: https://pypi.org/project/bagbag/
+project_url: https://pypi.org/project/bagbag/
+project_urls: {'Repository': 'https://github.com/darren2046/bagbag'}
+release_url: https://pypi.org/project/bagbag/0.75.24/
+requires_dist: ['Faker>=0.8', 'Flask>=2.1.3', 'Js2Py>=0.74', 'Levenshtein>=0.23.0', 'OpenCC>=0.2', 'Pillow>=9.2.0', 'PyGithub>=1.57', 'PyMySQL>=1.0.2', 'Pygments>=2.2', 'backpack>=0.1', 'bcrypt==4.0.1', 'beautifulsoup4>=4.11.1', 'blinker>=1.4', 'cachetools>=4.2.4', 'cleo>=0.6', 'demjson3>=3.0.6', 'feedparser>=6.0.10', 'future>=0.18.2', 'hachoir>=3.2.0', 'hanzidentifier>=1.2.0', 'html-to-json>=2.0.0', 'html5lib>=1.1', 'inflection>=0.3', 'ipdb>=0.13.9', 'ipwhois>=1.2.0', 'jieba>=0.42.1', 'kafka-python>=2.0.2', 'langid>=1.1.6', 'lazy-imports==0.3.1', 'lazy-object-proxy>=1.2', 'listparser>=0.19', 'loguru>=0.6.0', 'lxml>=4.9.1', 'lz4>=4.3.3', 'markdown2>=2.4.9', 'markdownify>=0.11.6', 'matplotlib>=3.9.0', 'mitmproxy>=10.3.1', 'msgpack>=1.0.4', 'nltk>=3.8.1', 'nslookup>=1.6.1', 'openai>=1.6.1', 'opencv-python>=4.6.0.66', 'openpyxl>=3.0.10', 'packaging>=20.9', 'paramiko>=2.11.0', 'pendulum>=1.4', 'pillow>=10.3.0', 'prometheus-client>=0.14.1', 'psutil>=5.9.1', 'pyTelegramBotAPI>=4.13.0', 'pyaml>=16.12', 'pybase64>=1.2.3', 'pycryptodome>=3.15.0', 'pygtrans>=1.4.0', 'pymongo>=4.8.0', 'pypinyin>=0.47.1', 'python-dateutil>=2.8.2', 'python-magic>=0.4.27', 'pythonping>=1.1.3', 'pytz>=2022.1', 'pyyaml>=5.1', 'random-user-agent>=1.0.1', 'redis>=4.3.4', 'requests>=2.28.1', 'requests-toolbelt>=0.9.1', 'schedule>=1.1.0', 'scikit-learn>=1.3.0', 'selenium>=4.3.0', 'selenium-wire>=5.1.0', 'service-identity>=24.1.0', 'shortuuid>=1.0.9', 'simplejson>=3.10', 'six>=1.10', 'telethon>=1.24.0', 'tld>=0.13', 'tldextract>=5.1.2', 'tqdm>=4.64.0', 'tronpy>=0.2.6', 'tweepy>=4.12.1', 'vaderSentiment>=3.3.2', 'validators>=0.20.0', 'vncdotool>=1.2.0', 'windows-curses>=2.3.0; sys_platform == "win32"', 'wrapt>=1.10']
+requires_python: >=3.9
+version: 0.75.24
+
+================================================================================
+Report generated by PyPI Llama Explorer on 2025-03-03 18:21:21.630263

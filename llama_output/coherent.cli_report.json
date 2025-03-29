@@ -1,0 +1,93 @@
+{
+  "name": "coherent.cli",
+  "version": "0.4.1",
+  "summary": "Command-line interface for Coherent Software Development System",
+  "description": "[![](https://img.shields.io/pypi/v/coherent.cli)](https://pypi.org/project/coherent.cli)\n\n![](https://img.shields.io/pypi/pyversions/coherent.cli)\n\n[![](https://github.com/coherent-oss/coherent.cli/actions/workflows/main.yml/badge.svg)](https://github.com/coherent-oss/coherent.cli/actions?query=workflow%3A%22tests%22)\n\n[![Coherent Software Development System](https://img.shields.io/badge/coherent%20system-informational)](https://github.com/coherent-oss/system)\n\nCommand-line interface for the\n[Coherent Software Development System](https://bit.ly/coherent-system>).\n",
+  "author": null,
+  "author_email": "\"Jason R. Coombs\" <bartoszpiotrslawecki@gmail.com>",
+  "license": null,
+  "project_url": "https://pypi.org/project/coherent.cli/",
+  "homepage": null,
+  "requires_python": ">=3.8",
+  "dependencies": [
+    "coherent.build",
+    "coherent.test",
+    "jaraco.vcs",
+    "jaraco.versioning",
+    "typer",
+    "typing-extensions"
+  ],
+  "files": {
+    "python": [
+      "__init__.py",
+      "__main__.py"
+    ],
+    "documentation": [
+      "README.md",
+      "(meta)/entry_points.txt"
+    ],
+    "tests": [],
+    "configuration": [
+      "pyproject.toml"
+    ],
+    "data": [],
+    "other": [
+      "PKG-INFO",
+      "(meta)/entry_points.txt.orig"
+    ]
+  },
+  "metadata": {
+    "author": null,
+    "author_email": "\"Jason R. Coombs\" <bartoszpiotrslawecki@gmail.com>",
+    "bugtrack_url": null,
+    "classifiers": [
+      "Development Status :: 4 - Beta",
+      "Intended Audience :: Developers",
+      "License :: OSI Approved :: MIT License",
+      "Programming Language :: Python :: 3",
+      "Programming Language :: Python :: 3 :: Only"
+    ],
+    "description": "[![](https://img.shields.io/pypi/v/coherent.cli)](https://pypi.org/project/coherent.cli)\n\n![](https://img.shields.io/pypi/pyversions/coherent.cli)\n\n[![](https://github.com/coherent-oss/coherent.cli/actions/workflows/main.yml/badge.svg)](https://github.com/coherent-oss/coherent.cli/actions?query=workflow%3A%22tests%22)\n\n[![Coherent Software Development System](https://img.shields.io/badge/coherent%20system-informational)](https://github.com/coherent-oss/system)\n\nCommand-line interface for the\n[Coherent Software Development System](https://bit.ly/coherent-system>).\n",
+    "description_content_type": "text/markdown",
+    "docs_url": null,
+    "download_url": null,
+    "downloads": {
+      "last_day": -1,
+      "last_month": -1,
+      "last_week": -1
+    },
+    "dynamic": null,
+    "home_page": null,
+    "keywords": null,
+    "license": null,
+    "license_expression": null,
+    "license_files": null,
+    "maintainer": null,
+    "maintainer_email": null,
+    "name": "coherent.cli",
+    "package_url": "https://pypi.org/project/coherent.cli/",
+    "platform": null,
+    "project_url": "https://pypi.org/project/coherent.cli/",
+    "project_urls": {
+      "Source": "https://github.com/coherent-oss/coherent.cli"
+    },
+    "provides_extra": [
+      "test",
+      "doc"
+    ],
+    "release_url": "https://pypi.org/project/coherent.cli/0.4.1/",
+    "requires_dist": [
+      "coherent.build",
+      "coherent.test",
+      "jaraco.vcs",
+      "jaraco.versioning",
+      "typer",
+      "typing-extensions"
+    ],
+    "requires_python": ">=3.8",
+    "summary": "Command-line interface for Coherent Software Development System",
+    "version": "0.4.1",
+    "yanked": false,
+    "yanked_reason": null
+  }
+}
